@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.lifecycle.ViewModelProvider;
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
+import dev.omar.goterminal.utils.ArchUtils;
 import dev.omar.goterminal.utils.UiUtils;
 
 public class MainActivity extends EdgeToEdgeActivity {
@@ -44,12 +45,13 @@ public class MainActivity extends EdgeToEdgeActivity {
 
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
-                binding.includeToolbar.appbar, true, true, true, true);
+                binding.includeToolbar.appbar, true, true, true, false);
         UiUtils.addSystemWindowInsetToPadding(binding.layoutDrawer, true, true, true, true);
     }
 
     private void setupToolbar() {
         setSupportActionBar(binding.includeToolbar.toolbar);
+        binding.includeToolbar.toolbar.setSubtitle(ArchUtils.getArch());
         ActionBarDrawerToggle toggle =
                 new ActionBarDrawerToggle(
                         this,
