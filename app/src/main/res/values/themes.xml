@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base.Theme.GoTerminal" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+       <item name="android:statusBarColor">?colorSurface</item>
+       <item name="android:navigationBarColor">?colorSurface</item>
+       <item name="android:windowLightStatusBar">?isLightTheme</item>
+       <item name="android:windowLightNavigationBar" tools:ignore="NewApi">?isLightTheme</item>
+    </style>
+
+    <style name="Theme.GoTerminal" parent="Base.Theme.GoTerminal" />
+</resources>

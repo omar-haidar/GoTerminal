@@ -1,0 +1,41 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'dev.omar.goterminal'
+    compileSdk = rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "dev.omar.goterminal"
+        minSdk = 24
+        targetSdk = 28
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+    compileOptions {
+        sourceCompatibility = rootProject.ext.javaS
+        targetCompatibility = rootProject.ext.javaT
+    }
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
+}
+
+dependencies {
+    implementation libs.activity.ktx
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.material
+
+    implementation libs.termux.view
+    implementation libs.termux.emulator
+    implementation libs.utilcodex
+    implementation libs.gson
+
+}
