@@ -27,50 +27,62 @@
             android:id="@+id/view_pager" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="320dp"
-        android:background="?colorSurfaceContainer"
+    <FrameLayout
         android:layout_height="match_parent"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:background="?colorSurfaceContainer"
         android:clickable="true"
+        android:focusable="true"
         android:layout_gravity="start"
-        android:id="@+id/layout_Drawer">
+        android:layout_width="320dp">
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:translationX="-72dp"
+            android:scaleType="fitCenter"
+            android:rotation="45"
+            android:alpha="0.7"
+            android:layout_gravity="left|center"
+            android:src="@drawable/ic_comedy_mask" />
         <LinearLayout
             android:layout_width="match_parent"
-            android:gravity="center_vertical"
-            android:paddingBottom="12dp"
-            android:paddingTop="8dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Sessions"
-                android:layout_weight="1"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-                tools:ignore="HardcodedText" />
-
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:clickable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:focusable="true"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_plus" />
-        </LinearLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/item_session"
-            tools:itemCount="4"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:id="@+id/recycler_view" />
-    </LinearLayout>
+            android:paddingLeft="16dp"
+            android:id="@+id/layout_Drawer"
+            android:paddingRight="16dp"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:paddingBottom="12dp"
+                android:paddingTop="8dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Sessions"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    tools:ignore="HardcodedText" />
 
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:clickable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:focusable="true"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_add" />
+            </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/item_session"
+                tools:itemCount="4"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:id="@+id/recycler_view" />
+        </LinearLayout>
+    </FrameLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
