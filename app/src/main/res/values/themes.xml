@@ -5,6 +5,8 @@
        <item name="android:navigationBarColor">?colorSurface</item>
        <item name="android:windowLightStatusBar">?isLightTheme</item>
        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">?isLightTheme</item>
+       <item name="fontFamily">@font/josefin_sans</item>
+    <item name="android:fontFamily">@font/josefin_sans</item>
     </style>
 
     <style name="Theme.GoTerminal" parent="Base.Theme.GoTerminal" />
