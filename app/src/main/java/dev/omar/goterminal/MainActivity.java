@@ -13,7 +13,7 @@ import dev.omar.goterminal.utils.UiUtils;
 
 public class MainActivity extends EdgeToEdgeActivity {
 
-    private OnBackPressedCallback backCallback =
+    private final OnBackPressedCallback backCallback =
             new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {

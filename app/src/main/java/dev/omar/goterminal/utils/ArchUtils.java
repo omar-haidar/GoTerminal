@@ -7,10 +7,12 @@ import java.util.Arrays;
 
 public final class ArchUtils {
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static boolean isAarch64() {
         return Arrays.asList(Build.SUPPORTED_ABIS).contains("arm64-v8a");
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static boolean isArmv7a() {
         return Arrays.asList(Build.SUPPORTED_ABIS).contains("armeabi-v7a");
     }
