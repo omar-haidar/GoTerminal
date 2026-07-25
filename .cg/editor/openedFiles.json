@@ -14,6 +14,21 @@
           "line": 0
         }
       }
+    },
+    {
+      "file": "/storage/emulated/0/CodeOnTheGoProjects/GoTerminal/app/src/main/java/dev/omar/goterminal/terminal/TerminalFactory.java",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 155,
+          "line": 7
+        },
+        "start": {
+          "column": 0,
+          "index": 155,
+          "line": 7
+        }
+      }
     }
   ],
   "projectPath": "/storage/emulated/0/CodeOnTheGoProjects/GoTerminal",

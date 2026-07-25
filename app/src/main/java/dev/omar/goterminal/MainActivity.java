@@ -5,13 +5,12 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
+import androidx.lifecycle.ViewModelProvider;
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.utils.UiUtils;
 
 public class MainActivity extends EdgeToEdgeActivity {
-
-    private ActivityMainBinding binding;
 
     private OnBackPressedCallback backCallback =
             new OnBackPressedCallback(true) {
@@ -24,6 +23,8 @@ public class MainActivity extends EdgeToEdgeActivity {
                     }
                 }
             };
+    private ActivityMainBinding binding;
+    private MainViewModel mainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,13 @@ public class MainActivity extends EdgeToEdgeActivity {
         setContentView(binding.getRoot());
         setupLayoutInsets();
         setupToolbar();
+        initializeLogic();
+    }
+    
+    private void initializeLogic() {
+    	mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        
+        
     }
 
     private void setupLayoutInsets() {

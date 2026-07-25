@@ -5,4 +5,5 @@ import com.termux.view.TerminalView;
 public interface TerminalFactory {
 
     public TerminalView createTerminal();
+
 }
