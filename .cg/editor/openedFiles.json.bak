@@ -1,0 +1,21 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/CodeOnTheGoProjects/GoTerminal/app/src/main/java/dev/omar/goterminal/MainActivity.java",
+      "selection": {
+        "end": {
+          "column": 53,
+          "index": 749,
+          "line": 24
+        },
+        "start": {
+          "column": 53,
+          "index": 749,
+          "line": 24
+        }
+      }
+    }
+  ],
+  "projectPath": "/storage/emulated/0/CodeOnTheGoProjects/GoTerminal",
+  "selectedFile": "/storage/emulated/0/CodeOnTheGoProjects/GoTerminal/app/src/main/java/dev/omar/goterminal/MainActivity.java"
+}
