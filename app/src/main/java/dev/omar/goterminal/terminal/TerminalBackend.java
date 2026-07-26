@@ -10,6 +10,17 @@ import com.termux.terminal.TerminalSessionClient;
 import com.termux.view.TerminalViewClient;
 
 public class TerminalBackend implements TerminalViewClient, TerminalSessionClient {
+    
+    public interface SessionFinishedListener {
+        void onSessionFinished(TerminalSession session);
+    }
+    
+    private SessionFinishedListener sessionFinishedListener;
+    
+    public void setSessionFinishedListener(SessionFinishedListener listener) {
+        this.sessionFinishedListener = listener;
+    }
+
     @Override
     public void onTextChanged(TerminalSession changedSession) {
 
@@ -22,7 +33,9 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onSessionFinished(TerminalSession finishedSession) {
-
+        if (sessionFinishedListener != null) {
+            sessionFinishedListener.onSessionFinished(finishedSession);
+        }
     }
 
     @Override
@@ -52,17 +65,18 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public Integer getTerminalCursorStyle() {
-        return 0;
+        return TerminalEmulator.TERMINAL_CURSOR_STYLE_BLOCK;
     }
 
     @Override
     public float onScale(float scale) {
-        return TerminalEmulator.DEFAULT_TERMINAL_CURSOR_STYLE;
+        return scale;
     }
 
     @Override
     public void onSingleTapUp(MotionEvent e) {
-
+        // لا نحتاج لكتابة شيء هنا حالياً لأننا عالجنا النقر في الـ Adapter
+        // ولكن يمكن استخدامه لاحقاً إذا لزم الأمر
     }
 
     @Override
@@ -72,7 +86,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public boolean shouldEnforceCharBasedInput() {
-        return false;
+        return true; // قد يساعد في ظهور لوحة المفاتيح في بعض الأجهزة
     }
 
     @Override
@@ -82,7 +96,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public boolean isTerminalViewSelected() {
-        return false;
+        return true;
     }
 
     @Override
@@ -92,6 +106,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) {
+        if (session == null) return false;
         return false;
     }
 

@@ -1,36 +1,35 @@
 package dev.omar.goterminal.utils;
 
+import android.content.Context;
 import android.system.ErrnoException;
 import android.system.Os;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ResourceUtils;
-
-import org.jetbrains.annotations.Contract;
+import com.blankj.utilcode.util.ZipUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class TerminalInstaller {
 
-    private static final String DATA_PATH = "/data/data/dev.omar.goterminal";
-    private static final String PREFIX_PATH = DATA_PATH + "/files/data/data/com.termux/files/usr";
-    private static final String CACHE_PATH = DATA_PATH + "/cache";
-    private static final String HOME_PATH = DATA_PATH + "/files/home";
-    private static final String PROOT_FILE_PATH = HOME_PATH + "/proot";
-    private static final String LIBTALLOC_FILE_PATH = HOME_PATH + "/libtalloc.so.2";
-    private static final String BUSYBOX_FILE_PATH = HOME_PATH + "/proot";
+    public static final String DATA_PATH = "/data/data/dev.omar.goterminal/files";
+    public static final String PREFIX_PATH = DATA_PATH + "/usr";
+    public static final String HOME_PATH = DATA_PATH + "/home";
+    public static final String BIN_PATH = DATA_PATH + "/bin";
+    
+    public static final String PROOT_FILE_PATH = BIN_PATH + "/proot";
+    public static final String BUSYBOX_FILE_PATH = BIN_PATH + "/busybox";
     private static final String INSTALLED_TERMINAL_MARKER_FILE_PATH = PREFIX_PATH + "/.terminal_installed";
 
-    @Nullable
-    @Contract(pure = true)
-    public static CompletableFuture<Result> installIfNeeded() {
+    public static CompletableFuture<Result> installIfNeeded(Context context) {
         if (new File(INSTALLED_TERMINAL_MARKER_FILE_PATH).exists()) {
-            return CompletableFuture.completedFuture(new Result(true));
+            return CompletableFuture.completedFuture(new Result(true, "Already installed"));
         }
-        return extractBootstrap();
+        return CompletableFuture.supplyAsync(() -> extractBootstrap(context));
     }
 
     @NonNull
@@ -38,42 +37,46 @@ public class TerminalInstaller {
         return ArchUtils.getArch().concat("/").concat(name);
     }
 
-    private static CompletableFuture<Result> extractBootstrap() {
-        final String bootstrapFilePath = CACHE_PATH + "/bootstrap.zip";
-        if (!new File(bootstrapFilePath).exists()) {
-            ResourceUtils.copyFileFromAssets(getCompatAsset("bootstrap.zip"), bootstrapFilePath);
-        }
-        if (!new File(BUSYBOX_FILE_PATH).exists()) {
-            ResourceUtils.copyFileFromAssets(getCompatAsset("busybox"), BUSYBOX_FILE_PATH);
-        }
-        if (!new File(PROOT_FILE_PATH).exists() || !new File(LIBTALLOC_FILE_PATH).exists()) {
-            ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
-            ResourceUtils.copyFileFromAssets(getCompatAsset("libtalloc.so.2"), LIBTALLOC_FILE_PATH);
-        }
+    private static Result extractBootstrap(Context context) {
         try {
-            Os.chmod(BUSYBOX_FILE_PATH,777);
-            Os.chmod(PROOT_FILE_PATH,777);
-        } catch (ErrnoException e) {
-            return CompletableFuture.completedFuture(new Result(e));
-        }
+            // Create directories
+            FileUtils.createOrExistsDir(PREFIX_PATH);
+            FileUtils.createOrExistsDir(HOME_PATH);
+            FileUtils.createOrExistsDir(BIN_PATH);
 
-        return CompletableFuture.completedFuture(new Result(false,"Null installing error!"));
+            // Copy Binaries
+            ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("busybox"), BUSYBOX_FILE_PATH);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("libtalloc.so.2"), BIN_PATH + "/libtalloc.so.2");
+
+            // Extract Bootstrap to usr
+            File bootstrapZip = new File(context.getCacheDir(), "bootstrap.zip");
+            ResourceUtils.copyFileFromAssets(getCompatAsset("bootstrap.zip"), bootstrapZip.getAbsolutePath());
+            ZipUtils.unzipFile(bootstrapZip, new File(PREFIX_PATH));
+            bootstrapZip.delete();
+
+            // Set Permissions
+            Os.chmod(PROOT_FILE_PATH, 0777);
+            Os.chmod(BUSYBOX_FILE_PATH, 0777);
+            
+            // Create marker
+            File marker = new File(INSTALLED_TERMINAL_MARKER_FILE_PATH);
+            if (marker.exists()) marker.delete();
+            marker.createNewFile();
+
+            return new Result(true, "Installation successful");
+        } catch (IOException | ErrnoException e) {
+            return new Result(false, e.getMessage());
+        }
     }
 
     public static class Result {
         private final boolean success;
         private final String message;
+
         public Result(boolean success, String message) {
             this.success = success;
             this.message = message;
-        }
-
-        public Result(boolean success) {
-            this(success,"");
-        }
-
-        public Result(Throwable th) {
-           this(false,th.getMessage());
         }
 
         public boolean isSuccess() {
@@ -84,5 +87,4 @@ public class TerminalInstaller {
             return message;
         }
     }
-
 }

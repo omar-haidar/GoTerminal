@@ -20,11 +20,11 @@
             android:id="@+id/include_toolbar"
             layout="@layout/toolbar" />
 
-        <androidx.viewpager2.widget.ViewPager2
+        <FrameLayout
+            android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:id="@+id/view_pager" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <FrameLayout
@@ -61,6 +61,7 @@
 
 
                 <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/img_add_session"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:clickable="true"

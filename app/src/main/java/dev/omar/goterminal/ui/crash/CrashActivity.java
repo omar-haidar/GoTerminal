@@ -37,6 +37,8 @@ public class CrashActivity extends AppCompatActivity {
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         cm.setPrimaryClip(ClipData.newPlainText("Termo", message));
         Toast.makeText(this, "Copied!", 0).show();
+        finish();
+
     }
 
     public static void initCrashHandler(Application app) {
