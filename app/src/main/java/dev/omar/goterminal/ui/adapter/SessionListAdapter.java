@@ -56,7 +56,7 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
         boolean isSelected = position == selectedPosition;
         
         int bgColor = isSelected ? 
-                MaterialColors.getColor(holder.itemView, com.google.android.material.R.attr.colorPrimaryContainer) : 
+                MaterialColors.getColor(holder.itemView, com.google.android.material.R.attr.colorSecondaryContainer) :
                 android.graphics.Color.TRANSPARENT;
         
         int strokeColor = isSelected ? 

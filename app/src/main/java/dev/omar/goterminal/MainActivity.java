@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.ui.terminal.TerminalFragment;
 import dev.omar.goterminal.terminal.TerminalBackend;
+import dev.omar.goterminal.terminal.TerminalService;
 import dev.omar.goterminal.ui.adapter.SessionListAdapter;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.utils.ArchUtils;
@@ -57,42 +58,55 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
         listAdapter = new SessionListAdapter(this);
         binding.recyclerView.setAdapter(listAdapter);
 
-        mainViewModel.getSessions().observe(this, this::syncFragmentsWithSessions);
+        mainViewModel.getTerminalService().observe(this, service -> {
+            if (service != null) {
+                service.getSessions().observe(this, this::syncFragmentsWithSessions);
+                checkInstallation();
+            }
+        });
 
         binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());
-
-        // Handle Installation before creating sessions
-        checkInstallation();
     }
 
     private void checkInstallation() {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = 
+        if (!new java.io.File(getApplicationContext().getFilesDir(), "usr/.terminal_installed").exists()) {
+            com.google.android.material.dialog.MaterialAlertDialogBuilder builder = 
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Setting up environment")
                 .setMessage("Please wait while we prepare the terminal system...")
                 .setCancelable(false);
         
-        final androidx.appcompat.app.AlertDialog dialog = builder.create();
-        dialog.show();
+            final androidx.appcompat.app.AlertDialog dialog = builder.create();
+            dialog.show();
 
-        TerminalInstaller.installIfNeeded(this).thenAccept(result -> {
-            runOnUiThread(() -> {
-                dialog.dismiss();
-                if (result.isSuccess()) {
-                    // Create first session if empty after installation
-                    if (mainViewModel.getSessions().getValue() == null || mainViewModel.getSessions().getValue().isEmpty()) {
-                        mainViewModel.addNewSession();
+            TerminalInstaller.installIfNeeded(this).thenAccept(result -> {
+                runOnUiThread(() -> {
+                    dialog.dismiss();
+                    if (result.isSuccess()) {
+                        createInitialSession();
+                    } else {
+                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                                .setTitle("Installation Failed")
+                                .setMessage(result.getMessage())
+                                .setPositiveButton("Retry", (d, w) -> checkInstallation())
+                                .setNegativeButton("Exit", null)
+                                .show();
                     }
-                } else {
-                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                            .setTitle("Installation Failed")
-                            .setMessage(result.getMessage())
-                            .setPositiveButton("Retry", (d, w) -> checkInstallation())
-                            .setNegativeButton("Exit", (d, w) -> finish())
-                            .show();
-                }
+                });
             });
-        });
+        } else {
+            createInitialSession();
+        }
+    }
+
+    private void createInitialSession() {
+        TerminalService service = mainViewModel.getTerminalService().getValue();
+        if (service != null) {
+            List<TerminalSession> sessions = service.getSessions().getValue();
+            if (sessions == null || sessions.isEmpty()) {
+                mainViewModel.addNewSession();
+            }
+        }
     }
 
     private void syncFragmentsWithSessions(List<TerminalSession> sessions) {
@@ -193,12 +207,11 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
                 binding.includeToolbar.appbar, true, true, true, false);
-        UiUtils.addSystemWindowInsetToPadding(binding.layoutDrawer, true, true, true, true);
+        UiUtils.addSystemWindowInsetToPadding(binding.layoutDrawer, true, true, true, false);
     }
 
     private void setupToolbar() {
         setSupportActionBar(binding.includeToolbar.toolbar);
-        binding.includeToolbar.toolbar.setSubtitle(ArchUtils.getArch());
         ActionBarDrawerToggle toggle =
                 new ActionBarDrawerToggle(
                         this,
