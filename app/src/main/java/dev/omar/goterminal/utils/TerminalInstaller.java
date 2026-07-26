@@ -3,6 +3,7 @@ package dev.omar.goterminal.utils;
 import android.system.ErrnoException;
 import android.system.Os;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.ResourceUtils;
@@ -32,17 +33,22 @@ public class TerminalInstaller {
         return extractBootstrap();
     }
 
+    @NonNull
+    private static String getCompatAsset(String name) {
+        return ArchUtils.getArch().concat("/").concat(name);
+    }
+
     private static CompletableFuture<Result> extractBootstrap() {
         final String bootstrapFilePath = CACHE_PATH + "/bootstrap.zip";
         if (!new File(bootstrapFilePath).exists()) {
-            ResourceUtils.copyFileFromAssets("arm64-v8a/bootstrap.zip", bootstrapFilePath);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("bootstrap.zip"), bootstrapFilePath);
         }
         if (!new File(BUSYBOX_FILE_PATH).exists()) {
-            ResourceUtils.copyFileFromAssets("arm64-v8a/busybox", BUSYBOX_FILE_PATH);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("busybox"), BUSYBOX_FILE_PATH);
         }
         if (!new File(PROOT_FILE_PATH).exists() || !new File(LIBTALLOC_FILE_PATH).exists()) {
-            ResourceUtils.copyFileFromAssets("arm64-v8a/proot", PROOT_FILE_PATH);
-            ResourceUtils.copyFileFromAssets("arm64-v8a/libtalloc.so.2", LIBTALLOC_FILE_PATH);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
+            ResourceUtils.copyFileFromAssets(getCompatAsset("libtalloc.so.2"), LIBTALLOC_FILE_PATH);
         }
         try {
             Os.chmod(BUSYBOX_FILE_PATH,777);
