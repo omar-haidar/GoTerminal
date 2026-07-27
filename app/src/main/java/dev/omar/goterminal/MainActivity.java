@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import dev.omar.goterminal.databinding.ActivityMainBinding;
+import dev.omar.goterminal.ui.settings.SettingsActivity;
 import dev.omar.goterminal.ui.terminal.TerminalFragment;
 import dev.omar.goterminal.terminal.TerminalBackend;
 import dev.omar.goterminal.terminal.TerminalService;
@@ -66,6 +67,7 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
         });
 
         binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());
+        binding.imgSettings.setOnClickListener(v -> SettingsActivity.openSettings(MainActivity.this));
     }
 
     private void checkInstallation() {
