@@ -207,7 +207,7 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
                 binding.includeToolbar.appbar, true, true, true, false);
-        UiUtils.addSystemWindowInsetToPadding(binding.layoutDrawer, true, true, true, false);
+        UiUtils.addSystemWindowInsetToPadding(binding.navView, true, true, true, false);
     }
 
     private void setupToolbar() {
