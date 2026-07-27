@@ -7,25 +7,26 @@ import android.view.MenuItem;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import dev.omar.goterminal.databinding.ActivityMainBinding;
-import dev.omar.goterminal.ui.settings.SettingsActivity;
-import dev.omar.goterminal.ui.terminal.TerminalFragment;
-import dev.omar.goterminal.terminal.TerminalBackend;
-import dev.omar.goterminal.terminal.TerminalService;
-import dev.omar.goterminal.ui.adapter.SessionListAdapter;
-import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
-import dev.omar.goterminal.utils.ArchUtils;
-import dev.omar.goterminal.utils.TerminalInstaller;
-import dev.omar.goterminal.utils.UiUtils;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.blankj.utilcode.util.ActivityUtils;
 import com.termux.terminal.TerminalSession;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import dev.omar.goterminal.databinding.ActivityMainBinding;
+import dev.omar.goterminal.terminal.TerminalService;
+import dev.omar.goterminal.ui.adapter.SessionListAdapter;
+import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
+import dev.omar.goterminal.ui.settings.SettingsActivity;
+import dev.omar.goterminal.ui.terminal.TerminalFragment;
+import dev.omar.goterminal.utils.ArchUtils;
+import dev.omar.goterminal.utils.TerminalInstaller;
+import dev.omar.goterminal.utils.UiUtils;
 
 public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapter.OnSessionClickListener {
 
@@ -33,7 +34,7 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
             new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
-                    if (binding.drawerLayout != null && binding.drawerLayout.isOpen()) {
+                    if (binding.drawerLayout.isOpen()) {
                         binding.drawerLayout.closeDrawers();
                     } else {
                         finish();
@@ -201,7 +202,7 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle("Exit GoTerminal")
                     .setMessage("This is the last session. Do you want to exit the application?")
-                    .setPositiveButton("Exit", (dialog, which) -> finish())
+                    .setPositiveButton("Exit", (dialog, which) -> exitApp())
                     .setNegativeButton("Cancel", null)
                     .show();
         } else {
@@ -240,8 +241,14 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
         switch (item.getItemId()){
             case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
             case R.id.menu_item_about -> showAboutDialog();
+            case R.id.menu_item_exit -> exitApp();
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void exitApp() {
+        ActivityUtils.finishAllActivities();
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(0);
     }
 
     private void showAboutDialog() {
