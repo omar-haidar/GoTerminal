@@ -239,7 +239,22 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
+            case R.id.menu_item_about -> showAboutDialog();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showAboutDialog() {
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("About GoTerminal")
+                .setMessage("GoTerminal v1.0\n\n" +
+                        "A powerful terminal emulator for Android based on Termux technology, " +
+                        "allowing you to run a Linux-like environment using PRoot.\n\n" +
+                        "Developed by: Omar\n" +
+                        "Build Architecture: " + ArchUtils.getArch() + "\n\n" +
+                        "© 2024 GoTerminal Project")
+                .setPositiveButton("Close", null)
+                .setIcon(R.drawable.ic_comedy_mask)
+                .show();
     }
 }
