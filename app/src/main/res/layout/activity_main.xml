@@ -62,13 +62,24 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/img_add_session"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:clickable="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:focusable="true"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_add" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/img_settings"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:clickable="true"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:focusable="true"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_settings" />
             </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
