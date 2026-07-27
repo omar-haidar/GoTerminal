@@ -1,6 +1,3 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -16,6 +13,7 @@ android {
     defaultConfig {
         applicationId "dev.omar.goterminal"
         minSdk = 24
+        //noinspection ExpiredTargetSdkVersion
         targetSdk = 28
         versionCode = 1
         versionName = "1.0"
@@ -41,10 +39,12 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
     compileOptions {
         sourceCompatibility = rootProject.ext.javaS
         targetCompatibility = rootProject.ext.javaT
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
