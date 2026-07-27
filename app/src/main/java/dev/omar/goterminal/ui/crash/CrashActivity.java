@@ -9,9 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.blankj.utilcode.util.ClipboardUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class CrashActivity extends AppCompatActivity {
+public final class CrashActivity extends AppCompatActivity {
 
     public static final String EXTRA_CRASH_MESSAGE = "crash.extra.EXTRA_CRASH_MESSAGE";
     private String message = "No crash message!";
@@ -34,9 +36,7 @@ public class CrashActivity extends AppCompatActivity {
     }
 
     private void copyCrashMessage() {
-        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        cm.setPrimaryClip(ClipData.newPlainText("Termo", message));
-        Toast.makeText(this, "Copied!", 0).show();
+        ClipboardUtils.copyText("Goterminal",message);
         finish();
 
     }

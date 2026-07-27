@@ -1,8 +1,11 @@
 package dev.omar.goterminal;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -224,5 +227,19 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
         binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         getOnBackPressedDispatcher().addCallback(this, backCallback);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
