@@ -237,7 +237,9 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
+        switch (item.getItemId()){
+            case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
+        }
         return super.onOptionsItemSelected(item);
     }
 }
