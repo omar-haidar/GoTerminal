@@ -13,7 +13,7 @@ public class EdgeToEdgeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            getWindow().setNavigationBarContrastEnforced(true);
+            getWindow().setNavigationBarContrastEnforced(false);
         }
     }
 }
