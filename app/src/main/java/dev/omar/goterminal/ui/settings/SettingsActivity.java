@@ -8,9 +8,10 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import dev.omar.goterminal.databinding.ActivitySettingsBinding;
+import dev.omar.goterminal.ui.base.BaseActivity;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 
-public class SettingsActivity extends EdgeToEdgeActivity {
+public class SettingsActivity extends BaseActivity {
     private ActivitySettingsBinding binding;
 
     @Override
@@ -23,6 +24,8 @@ public class SettingsActivity extends EdgeToEdgeActivity {
 
     private void setupActionBar() {
         setSupportActionBar(binding.includeToolbar.toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         binding.includeToolbar.toolbar.setNavigationOnClickListener(v -> {finish();});
     }
 
