@@ -15,6 +15,7 @@ public class App extends Application {
         Utils.init(this);
         CrashActivity.initCrashHandler(this);
 
+
     }
 
     public static App get(){
