@@ -1,9 +1,12 @@
 package dev.omar.goterminal;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -28,7 +31,8 @@ import dev.omar.goterminal.utils.ArchUtils;
 import dev.omar.goterminal.utils.TerminalInstaller;
 import dev.omar.goterminal.utils.UiUtils;
 
-public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapter.OnSessionClickListener {
+public class MainActivity extends EdgeToEdgeActivity
+        implements SessionListAdapter.OnSessionClickListener {
 
     private final OnBackPressedCallback backCallback =
             new OnBackPressedCallback(true) {
@@ -56,50 +60,63 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
         setupToolbar();
         initializeLogic();
     }
-    
+
     private void initializeLogic() {
-    	mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
-        
+        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
         listAdapter = new SessionListAdapter(this);
         binding.recyclerView.setAdapter(listAdapter);
 
-        mainViewModel.getTerminalService().observe(this, service -> {
-            if (service != null) {
-                service.getSessions().observe(this, this::syncFragmentsWithSessions);
-                checkInstallation();
-            }
-        });
+        mainViewModel
+                .getTerminalService()
+                .observe(
+                        this,
+                        service -> {
+                            if (service != null) {
+                                service.getSessions()
+                                        .observe(this, this::syncFragmentsWithSessions);
+                                checkInstallation();
+                            }
+                        });
 
         binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());
-        binding.imgSettings.setOnClickListener(v -> SettingsActivity.openSettings(MainActivity.this));
+        binding.imgSettings.setOnClickListener(
+                v -> SettingsActivity.openSettings(MainActivity.this));
     }
 
     private void checkInstallation() {
-        if (!new java.io.File(getApplicationContext().getFilesDir(), "usr/.terminal_installed").exists()) {
-            com.google.android.material.dialog.MaterialAlertDialogBuilder builder = 
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Setting up environment")
-                .setMessage("Please wait while we prepare the terminal system...")
-                .setCancelable(false);
-        
+        if (!new java.io.File(getApplicationContext().getFilesDir(), "usr/.terminal_installed")
+                .exists()) {
+            com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setTitle("Setting up environment")
+                            .setMessage("Please wait while we prepare the terminal system...")
+                            .setCancelable(false);
+
             final androidx.appcompat.app.AlertDialog dialog = builder.create();
             dialog.show();
 
-            TerminalInstaller.installIfNeeded(this).thenAccept(result -> {
-                runOnUiThread(() -> {
-                    dialog.dismiss();
-                    if (result.isSuccess()) {
-                        createInitialSession();
-                    } else {
-                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                                .setTitle("Installation Failed")
-                                .setMessage(result.getMessage())
-                                .setPositiveButton("Retry", (d, w) -> checkInstallation())
-                                .setNegativeButton("Exit", null)
-                                .show();
-                    }
-                });
-            });
+            TerminalInstaller.installIfNeeded(this)
+                    .thenAccept(
+                            result -> {
+                                runOnUiThread(
+                                        () -> {
+                                            dialog.dismiss();
+                                            if (result.isSuccess()) {
+                                                createInitialSession();
+                                            } else {
+                                                new com.google.android.material.dialog
+                                                                .MaterialAlertDialogBuilder(this)
+                                                        .setTitle("Installation Failed")
+                                                        .setMessage(result.getMessage())
+                                                        .setPositiveButton(
+                                                                "Retry",
+                                                                (d, w) -> checkInstallation())
+                                                        .setNegativeButton("Exit", null)
+                                                        .show();
+                                            }
+                                        });
+                            });
         } else {
             createInitialSession();
         }
@@ -117,13 +134,13 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
 
     private void syncFragmentsWithSessions(List<TerminalSession> sessions) {
         listAdapter.setSessions(sessions);
-        
+
         // Remove fragments for closed sessions
         Map<String, TerminalFragment> toRemove = new HashMap<>(fragmentMap);
         for (TerminalSession session : sessions) {
             toRemove.remove(session.mHandle);
         }
-        
+
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         for (Map.Entry<String, TerminalFragment> entry : toRemove.entrySet()) {
@@ -173,7 +190,7 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
 
         activeSessionHandle = handle;
         ft.commitNow();
-        
+
         updateListSelection(handle, mainViewModel.getSessions().getValue());
     }
 
@@ -198,7 +215,8 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
 
     @Override
     public void onSessionDelete(TerminalSession session) {
-        if (mainViewModel.getSessions().getValue() != null && mainViewModel.getSessions().getValue().size() <= 1) {
+        if (mainViewModel.getSessions().getValue() != null
+                && mainViewModel.getSessions().getValue().size() <= 1) {
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle("Exit GoTerminal")
                     .setMessage("This is the last session. Do you want to exit the application?")
@@ -232,19 +250,20 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu,menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
             case R.id.menu_item_about -> showAboutDialog();
             case R.id.menu_item_exit -> exitApp();
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void exitApp() {
         ActivityUtils.finishAllActivities();
         android.os.Process.killProcess(android.os.Process.myPid());
@@ -254,14 +273,32 @@ public class MainActivity extends EdgeToEdgeActivity implements SessionListAdapt
     private void showAboutDialog() {
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("About GoTerminal")
-                .setMessage("GoTerminal v1.0\n\n" +
-                        "A powerful terminal emulator for Android based on Termux technology, " +
-                        "allowing you to run a Linux-like environment using PRoot.\n\n" +
-                        "Developed by: Omar\n" +
-                        "Build Architecture: " + ArchUtils.getArch() + "\n\n" +
-                        "© 2024 GoTerminal Project")
+                .setMessage(
+                        "GoTerminal v1.0\n\n"
+                                + "A powerful terminal emulator for Android based on Termux technology, "
+                                + "allowing you to run a Linux-like environment using PRoot.\n\n"
+                                + "Developed by: Omar Haidar\n"
+                                + "Build Architecture: "
+                                + ArchUtils.getArch()
+                                + "\n\n"
+                                + "© 2026 GoTerminal Project")
                 .setPositiveButton("Close", null)
+                .setNeutralButton("Github", (d, i) -> openGithub())
                 .setIcon(R.drawable.ic_comedy_mask)
                 .show();
+    }
+
+    private void openGithub() {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://github.com/omar-haidar/GoTerminal"));
+            startActivity(i);
+        } catch (Exception err) {
+            Toast.makeText(
+                            MainActivity.this,
+                            "Failed to open github repo : " + err.getMessage(),
+                            Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 }
