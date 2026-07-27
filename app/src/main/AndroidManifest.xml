@@ -28,6 +28,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:label="@string/settings"
+            android:name=".ui.settings.SettingsActivity"
+            android:configChanges="orientation" />
+        <activity
             android:name=".ui.crash.CrashActivity"
             android:configChanges="orientation" />
     </application>
