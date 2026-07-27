@@ -31,7 +31,6 @@ public class TerminalService extends Service {
 
     private static final String CHANNEL_ID = "terminal_service_channel";
     private static final int NOTIFICATION_ID = 1337;
-
     private final IBinder binder = new TerminalServiceBinder();
     private final MutableLiveData<List<TerminalSession>> sessions = new MutableLiveData<>(new ArrayList<>());
     private TerminalBackend terminalBackend;
