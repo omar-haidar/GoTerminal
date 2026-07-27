@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="false"
-        android:theme="@style/Theme.GoTerminal">
+        android:theme="@style/Theme.Karbon">
 
         <service android:name=".terminal.TerminalService" />
         <activity

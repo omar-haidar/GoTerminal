@@ -134,7 +134,7 @@ public class TerminalService extends Service {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("GoTerminal")
                 .setContentText(sessionCount + " active sessions")
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(dev.omar.goterminal.R.drawable.ic_comedy_mask)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .build();
