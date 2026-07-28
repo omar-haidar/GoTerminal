@@ -2,8 +2,10 @@ package dev.omar.goterminal;
 
 import android.app.Application;
 
+import android.content.Context;
 import com.blankj.utilcode.util.Utils;
 import dev.omar.goterminal.ui.crash.CrashActivity;
+import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 public class App extends Application {
 
@@ -17,6 +19,13 @@ public class App extends Application {
 
 
     }
+    
+    @Override
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
+        HiddenApiBypass.setHiddenApiExemptions("");
+    }
+    
 
     public static App get(){
         return sApp;

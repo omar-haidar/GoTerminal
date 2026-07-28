@@ -13,8 +13,19 @@ public class SessionConfig {
         this.arguments = args;
     }
 
-    public String getShellPath() { return shellPath; }
-    public String getWorkingDirectory() { return workingDirectory; }
-    public String[] getEnvironmentVariables() { return environmentVariables; }
-    public String[] getArguments() { return arguments; }
+    public String getShellPath() {
+        return shellPath;
+    }
+
+    public String getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    public String[] getEnvironmentVariables() {
+        return environmentVariables;
+    }
+
+    public String[] getArguments() {
+        return arguments;
+    }
 }

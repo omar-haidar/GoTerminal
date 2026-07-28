@@ -46,7 +46,7 @@ public class TerminalInstaller {
 
             // Copy Binaries
             ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
-            ResourceUtils.copyFileFromAssets(getCompatAsset("busybox"), BUSYBOX_FILE_PATH);
+            ResourceUtils.copyFileFromAssets("busybox", BUSYBOX_FILE_PATH);
             ResourceUtils.copyFileFromAssets(getCompatAsset("libtalloc.so.2"), BIN_PATH + "/libtalloc.so.2");
 
             // Extract Bootstrap to usr

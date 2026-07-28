@@ -231,7 +231,8 @@ public class MainActivity extends EdgeToEdgeActivity
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
                 binding.includeToolbar.appbar, true, true, true, false);
-        UiUtils.addSystemWindowInsetToPadding(binding.navView, true, true, true, false);
+        UiUtils.addSystemWindowInsetToPadding(binding.navView, true, true, false, false);
+        UiUtils.addSystemWindowInsetToPadding(binding.fragmentContainer, true, false, true, true);
     }
 
     private void setupToolbar() {

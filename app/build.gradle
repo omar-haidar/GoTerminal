@@ -49,6 +49,11 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 dependencies {
@@ -61,5 +66,7 @@ dependencies {
     implementation libs.termux.emulator
     implementation libs.utilcodex
     implementation libs.gson
+    
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
 
 }
