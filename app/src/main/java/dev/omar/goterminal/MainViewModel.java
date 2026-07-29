@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.omar.goterminal.terminal.TerminalBackend;
-import dev.omar.goterminal.terminal.TerminalService;
+import dev.omar.goterminal.terminal.service.TerminalService;
+import dev.omar.goterminal.terminal.service.TerminalServiceBinder;
 
 public class MainViewModel extends AndroidViewModel {
     
@@ -30,7 +31,7 @@ public class MainViewModel extends AndroidViewModel {
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            TerminalService.TerminalServiceBinder binder = (TerminalService.TerminalServiceBinder) service;
+            TerminalServiceBinder binder = (TerminalServiceBinder) service;
             TerminalService s = binder.getService();
             terminalService.setValue(s);
             isBound.setValue(true);
@@ -38,7 +39,7 @@ public class MainViewModel extends AndroidViewModel {
             if (currentServiceSessions != null) {
                 sessions.removeSource(currentServiceSessions);
             }
-            currentServiceSessions = s.getSessions();
+            currentServiceSessions = null;//s.getSessions();
             sessions.addSource(currentServiceSessions, value -> sessions.setValue(value));
         }
 
@@ -63,7 +64,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private void bindService() {
         Intent intent = new Intent(getApplication(), TerminalService.class);
-        getApplication().startService(intent); // Ensure service stays alive
+        getApplication().startService(intent);
         getApplication().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -81,18 +82,18 @@ public class MainViewModel extends AndroidViewModel {
 
     public void addNewSession() {
         if (Boolean.TRUE.equals(isBound.getValue()) && terminalService.getValue() != null) {
-            terminalService.getValue().createNewSession();
+            //terminalService.getValue().createNewSession();
         }
     }
     
     public void removeSession(TerminalSession session) {
         if (Boolean.TRUE.equals(isBound.getValue()) && terminalService.getValue() != null) {
-            terminalService.getValue().removeSession(session);
+            //terminalService.getValue().removeSession(session);
         }
     }
     
     public TerminalBackend getTerminalBackend() {
-        return terminalService.getValue() != null ? terminalService.getValue().getTerminalBackend() : null;
+        return /*terminalService.getValue() != null ? terminalService.getValue().getTerminalBackend() :*/ null;
     }
 
     @Override
