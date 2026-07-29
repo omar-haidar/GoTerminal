@@ -3,30 +3,21 @@ package dev.omar.goterminal;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.termux.terminal.TerminalSession;
+import com.blankj.utilcode.util.KeyboardUtils;
 
 import dev.omar.goterminal.databinding.ActivityMainBinding;
-import dev.omar.goterminal.terminal.service.TerminalService;
-import dev.omar.goterminal.ui.adapter.SessionListAdapter;
-import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
+import dev.omar.goterminal.ui.base.BaseTerminalActivity;
 import dev.omar.goterminal.ui.settings.SettingsActivity;
-import dev.omar.goterminal.ui.terminal.TerminalFragment;
-import dev.omar.goterminal.utils.TerminalInstaller;
 import dev.omar.goterminal.utils.UiUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class MainActivity extends EdgeToEdgeActivity {
+public class MainActivity extends BaseTerminalActivity {
 
     private final OnBackPressedCallback backCallback =
             new OnBackPressedCallback(true) {
@@ -41,7 +32,7 @@ public class MainActivity extends EdgeToEdgeActivity {
             };
     private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
-
+    private int terminalTextSize = 16;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,14 +44,24 @@ public class MainActivity extends EdgeToEdgeActivity {
     }
 
     private void initializeLogic() {
+        setupExtraKeysView();
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         /*binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());*/
         binding.imgSettings.setOnClickListener(
                 v -> SettingsActivity.openSettings(MainActivity.this));
+        setupTerminalView();
     }
 
+    private void setupTerminalView() {
+        binding.terminalView.setTerminalViewClient(MainActivity.this);
+        binding.terminalView.setTextSize(terminalTextSize);
+        binding.terminalView.setKeepScreenOn(true);
+    }
 
+    private void setupExtraKeysView() {
+
+    }
 
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
@@ -98,4 +99,31 @@ public class MainActivity extends EdgeToEdgeActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSingleTapUp(MotionEvent e) {
+        showSoftInput();
+    }
+
+    private void showSoftInput(){
+        binding.terminalView.requestFocus();
+        KeyboardUtils.showSoftInput(binding.terminalView);
+    }
+
+    @Override
+    public float onScale(float scale) {
+        if (scale < 0.9f || scale > 1.1f){
+            boolean increase = scale > 1.0f;
+            changeFont(increase);
+            return 1.0f;
+        }
+        return scale;
+    }
+
+    private void changeFont(boolean increase) {
+        terminalTextSize += (increase ? 1 : -1) * 2;
+        terminalTextSize = Math.max(16,Math.min(terminalTextSize,32));
+        binding.terminalView.setTextSize(terminalTextSize);
+    }
+
 }
