@@ -3,10 +3,11 @@ package dev.omar.goterminal;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -26,6 +27,7 @@ import dev.omar.goterminal.terminal.TerminalService;
 import dev.omar.goterminal.ui.adapter.SessionListAdapter;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.ui.settings.SettingsActivity;
+import dev.omar.goterminal.ui.sheet.ProgressSheetDialog;
 import dev.omar.goterminal.ui.terminal.TerminalFragment;
 import dev.omar.goterminal.utils.ArchUtils;
 import dev.omar.goterminal.utils.TerminalInstaller;
@@ -59,6 +61,26 @@ public class MainActivity extends EdgeToEdgeActivity
         setupLayoutInsets();
         setupToolbar();
         initializeLogic();
+        final ProgressSheetDialog progressSheetDialog = new ProgressSheetDialog.Builder()
+                .setTitle("Setup terminal")
+                .setMessage("Please wait ...")
+                .setIndeterminate(false)
+                .setProgress(64)
+                .setCancelable(false)
+                .setPositiveButton("Cancel", null)
+                .show(getSupportFragmentManager(), "setup");
+
+        new Thread(()->{
+            for (int i = 0; i <101; i++) {
+                final int progress  = i;
+                runOnUiThread(()->{
+                    progressSheetDialog.setProgress(progress);
+                    if(progress==100)
+                        progressSheetDialog.dismiss();
+                });
+                SystemClock.sleep(200);
+            }
+        }).start();
     }
 
     private void initializeLogic() {
@@ -106,7 +128,7 @@ public class MainActivity extends EdgeToEdgeActivity
                                                 createInitialSession();
                                             } else {
                                                 new com.google.android.material.dialog
-                                                                .MaterialAlertDialogBuilder(this)
+                                                        .MaterialAlertDialogBuilder(this)
                                                         .setTitle("Installation Failed")
                                                         .setMessage(result.getMessage())
                                                         .setPositiveButton(
