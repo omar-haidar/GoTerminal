@@ -15,5 +15,6 @@ public class EdgeToEdgeActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getWindow().setNavigationBarContrastEnforced(false);
         }
+
     }
 }

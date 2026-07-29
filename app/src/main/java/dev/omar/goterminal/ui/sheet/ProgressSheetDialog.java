@@ -2,6 +2,8 @@ package dev.omar.goterminal.ui.sheet;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -150,6 +152,14 @@ public class ProgressSheetDialog extends BottomSheetDialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null; // Prevent memory leaks
+    }
+
+    @Override
+    public void dismiss() {
+        new Handler(Looper.getMainLooper()).post(()->{
+            super.dismiss();
+        });
+
     }
 
     /**

@@ -13,6 +13,10 @@ public final class UiUtils {
         addWindowInsetToPadding(view, WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout(), left, top, right, bottom);
     }
 
+    public static void addSystemWindowAndImeInsetToPadding(View view, boolean left, boolean top, boolean right, boolean bottom) {
+        addWindowInsetToPadding(view, WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.ime(), left, top, right, bottom);
+    }
+
     public static void addWindowInsetToPadding(View view, int insetsTypeMask, boolean left, boolean top, boolean right, boolean bottom) {
         int initialLeft = view.getPaddingLeft();
         int initialTop = view.getPaddingTop();

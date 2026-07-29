@@ -3,27 +3,48 @@ package dev.omar.goterminal.terminal;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
+
 import com.blankj.utilcode.util.ClipboardUtils;
+import com.blankj.utilcode.util.KeyboardUtils;
 import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
+import com.termux.view.TerminalView;
 import com.termux.view.TerminalViewClient;
 
 public class TerminalBackend implements TerminalViewClient, TerminalSessionClient {
-    
+
+    private TerminalView terminalView;
+    private int terminalTextSize = 18;
+
+    public int getTerminalTextSize() {
+        return terminalTextSize;
+    }
+
+    public void setTerminalTextSize(int terminalTextSize) {
+        this.terminalTextSize = terminalTextSize;
+        terminalView.setTextSize(terminalTextSize);
+    }
+
+    private SessionFinishedListener sessionFinishedListener;
+
+    public TerminalBackend(@NonNull TerminalView terminalView) {
+        this.terminalView = terminalView;
+        terminalView.setTextSize(getTerminalTextSize());
+    }
+
     public interface SessionFinishedListener {
         void onSessionFinished(TerminalSession session);
     }
-    
-    private SessionFinishedListener sessionFinishedListener;
-    
+
     public void setSessionFinishedListener(SessionFinishedListener listener) {
         this.sessionFinishedListener = listener;
     }
 
     @Override
     public void onTextChanged(TerminalSession changedSession) {
-
+        terminalView.onScreenUpdated();
     }
 
     @Override
@@ -33,14 +54,19 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onSessionFinished(TerminalSession finishedSession) {
-        if (sessionFinishedListener != null) {
-            sessionFinishedListener.onSessionFinished(finishedSession);
+        if (confirmFinish){
+            if (sessionFinishedListener != null) {
+                sessionFinishedListener.onSessionFinished(finishedSession);
+            }
+        }else {
+            confirmFinish = true;
         }
+
     }
 
     @Override
     public void onCopyTextToClipboard(TerminalSession session, String text) {
-        ClipboardUtils.copyText("GoTerminal",text);
+        ClipboardUtils.copyText("GoTerminal", text);
     }
 
     @Override
@@ -70,13 +96,28 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public float onScale(float scale) {
+        if (scale < 0.9f || scale > 1.1f) {
+            boolean increase = scale > 1.0f;
+            changeFont(increase);
+            return 1.0f;
+        }
         return scale;
+    }
+
+    private void changeFont(boolean increase) {
+        terminalTextSize += (increase ? 1 : -1) * 2;
+        terminalTextSize = Math.max(16, Math.min(terminalTextSize, 32));
+        terminalView.setTextSize(terminalTextSize);
+    }
+
+    private void showSoftInput() {
+        terminalView.requestFocus();
+        KeyboardUtils.showSoftInput(terminalView);
     }
 
     @Override
     public void onSingleTapUp(MotionEvent e) {
-        // لا نحتاج لكتابة شيء هنا حالياً لأننا عالجنا النقر في الـ Adapter
-        // ولكن يمكن استخدامه لاحقاً إذا لزم الأمر
+        showSoftInput();
     }
 
     @Override
@@ -86,7 +127,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public boolean shouldEnforceCharBasedInput() {
-        return true; // قد يساعد في ظهور لوحة المفاتيح في بعض الأجهزة
+        return true;
     }
 
     @Override
@@ -104,9 +145,17 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     }
 
+    private boolean confirmFinish = false;
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession session) {
-        if (session == null) return false;
+
+        if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning()) {
+            if (sessionFinishedListener != null) {
+                sessionFinishedListener.onSessionFinished(session);
+            }
+            return false;
+        }
         return false;
     }
 
