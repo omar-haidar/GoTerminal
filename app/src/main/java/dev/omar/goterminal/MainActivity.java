@@ -1,12 +1,8 @@
 package dev.omar.goterminal;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -15,23 +11,20 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.blankj.utilcode.util.ActivityUtils;
 import com.termux.terminal.TerminalSession;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.terminal.TerminalService;
 import dev.omar.goterminal.ui.adapter.SessionListAdapter;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.ui.settings.SettingsActivity;
-import dev.omar.goterminal.ui.sheet.ProgressSheetDialog;
 import dev.omar.goterminal.ui.terminal.TerminalFragment;
-import dev.omar.goterminal.utils.ArchUtils;
 import dev.omar.goterminal.utils.TerminalInstaller;
 import dev.omar.goterminal.utils.UiUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends EdgeToEdgeActivity
         implements SessionListAdapter.OnSessionClickListener {
@@ -61,47 +54,12 @@ public class MainActivity extends EdgeToEdgeActivity
         setupLayoutInsets();
         setupToolbar();
         initializeLogic();
-        final ProgressSheetDialog progressSheetDialog = new ProgressSheetDialog.Builder()
-                .setTitle("Setup terminal")
-                .setMessage("Please wait ...")
-                .setIndeterminate(false)
-                .setProgress(64)
-                .setCancelable(false)
-                .setPositiveButton("Cancel", null)
-                .show(getSupportFragmentManager(), "setup");
-
-        new Thread(()->{
-            for (int i = 0; i <101; i++) {
-                final int progress  = i;
-                runOnUiThread(()->{
-                    progressSheetDialog.setProgress(progress);
-                    if(progress==100)
-                        progressSheetDialog.dismiss();
-                });
-                SystemClock.sleep(200);
-            }
-        }).start();
     }
 
     private void initializeLogic() {
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        listAdapter = new SessionListAdapter(this);
-        binding.recyclerView.setAdapter(listAdapter);
-
-        mainViewModel
-                .getTerminalService()
-                .observe(
-                        this,
-                        service -> {
-                            if (service != null) {
-                                service.getSessions()
-                                        .observe(this, this::syncFragmentsWithSessions);
-                                checkInstallation();
-                            }
-                        });
-
-        binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());
+        /*binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());*/
         binding.imgSettings.setOnClickListener(
                 v -> SettingsActivity.openSettings(MainActivity.this));
     }
@@ -128,7 +86,7 @@ public class MainActivity extends EdgeToEdgeActivity
                                                 createInitialSession();
                                             } else {
                                                 new com.google.android.material.dialog
-                                                        .MaterialAlertDialogBuilder(this)
+                                                                .MaterialAlertDialogBuilder(this)
                                                         .setTitle("Installation Failed")
                                                         .setMessage(result.getMessage())
                                                         .setPositiveButton(
@@ -242,7 +200,7 @@ public class MainActivity extends EdgeToEdgeActivity
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle("Exit GoTerminal")
                     .setMessage("This is the last session. Do you want to exit the application?")
-                    .setPositiveButton("Exit", (dialog, which) -> exitApp())
+                    .setPositiveButton("Exit", (dialog, which) -> App.exitApp())
                     .setNegativeButton("Cancel", null)
                     .show();
         } else {
@@ -281,47 +239,9 @@ public class MainActivity extends EdgeToEdgeActivity
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_settings -> SettingsActivity.openSettings(MainActivity.this);
-            case R.id.menu_item_about -> showAboutDialog();
-            case R.id.menu_item_exit -> exitApp();
+            case R.id.menu_item_about -> App.showAboutDialog(MainActivity.this);
+            case R.id.menu_item_exit -> App.exitApp();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void exitApp() {
-        ActivityUtils.finishAllActivities();
-        android.os.Process.killProcess(android.os.Process.myPid());
-        System.exit(0);
-    }
-
-    private void showAboutDialog() {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("About GoTerminal")
-                .setMessage(
-                        "GoTerminal v1.0\n\n"
-                                + "A powerful terminal emulator for Android based on Termux technology, "
-                                + "allowing you to run a Linux-like environment using PRoot.\n\n"
-                                + "Developed by: Omar Haidar\n"
-                                + "Build Architecture: "
-                                + ArchUtils.getArch()
-                                + "\n\n"
-                                + "© 2026 GoTerminal Project")
-                .setPositiveButton("Close", null)
-                .setNeutralButton("Github", (d, i) -> openGithub())
-                .setIcon(R.drawable.ic_comedy_mask)
-                .show();
-    }
-
-    private void openGithub() {
-        try {
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setData(Uri.parse("https://github.com/omar-haidar/GoTerminal"));
-            startActivity(i);
-        } catch (Exception err) {
-            Toast.makeText(
-                            MainActivity.this,
-                            "Failed to open github repo : " + err.getMessage(),
-                            Toast.LENGTH_LONG)
-                    .show();
-        }
     }
 }

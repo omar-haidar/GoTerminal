@@ -31,15 +31,21 @@ public class TerminalService extends Service {
 
     private static final String CHANNEL_ID = "terminal_service_channel";
     private static final int NOTIFICATION_ID = 1337;
-    private final IBinder binder = new TerminalServiceBinder();
+    
+    private final IBinder binder = new TerminalServiceBinder(this);
+    
     private final MutableLiveData<List<TerminalSession>> sessions = new MutableLiveData<>(new ArrayList<>());
     private TerminalBackend terminalBackend;
     private TerminalSessionFactory sessionFactory;
     private int sessionCounter = 0;
 
-    public class TerminalServiceBinder extends Binder {
+    public static class TerminalServiceBinder extends Binder {
+        private TerminalService service;
+        public TerminalServiceBinder(TerminalService service) {
+        	this.service = service;
+        }
         public TerminalService getService() {
-            return TerminalService.this;
+            return service;
         }
     }
 
@@ -98,7 +104,6 @@ public class TerminalService extends Service {
             session.finishIfRunning();
             sessions.postValue(currentSessions);
             updateNotification();
-            
             if (currentSessions.isEmpty()) {
                 stopForeground(true);
                 stopSelf();
@@ -148,6 +153,6 @@ public class TerminalService extends Service {
     
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 }

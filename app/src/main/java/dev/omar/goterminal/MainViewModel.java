@@ -58,7 +58,7 @@ public class MainViewModel extends AndroidViewModel {
     public MainViewModel(Application app) {
         super(app);
         sessions.setValue(new ArrayList<>());
-        bindService();
+        //bindService();
     }
 
     private void bindService() {
