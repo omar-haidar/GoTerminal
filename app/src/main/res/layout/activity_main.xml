@@ -24,7 +24,7 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent"
            android:layout_weight="1"
-           android:background="#ff000000"
+           android:background="?colorSurface"
            android:id="@+id/terminal_view"
            android:focusableInTouchMode="true"
            android:scrollbars="vertical"/>
