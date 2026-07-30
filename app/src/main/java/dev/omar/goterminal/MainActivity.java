@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
 
 import java.util.ArrayList;
@@ -59,9 +60,14 @@ public class MainActivity extends EdgeToEdgeActivity {
                         .setCancelable(false)
                         .show(getSupportFragmentManager(), "installing-tools");
         TerminalInstaller.installIfNeeded(this)
-                .whenComplete((result, throwable) -> sheetDialog.dismiss());
-        setupTerminalView();
-        setupExtraKeysView();
+                .whenComplete((result, throwable) -> {
+                    runOnUiThread(()->{
+                        setupTerminalView();
+                    });
+                    sheetDialog.dismiss();
+                });
+
+
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         /*binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());*/
@@ -75,49 +81,21 @@ public class MainActivity extends EdgeToEdgeActivity {
         binding.terminalView.setTerminalViewClient(terminalBackend);
         binding.terminalView.setKeepScreenOn(true);
 
-        String prootBinary = TerminalInstaller.PROOT_FILE_PATH;
-        String rootfs = TerminalInstaller.ROOTFS_PATH;
-        String home = TerminalInstaller.HOME_PATH;
-
-        List<String> args = new ArrayList<>();
-        args.add(prootBinary);
-        args.add("-0"); // Fake root
-        args.add("-l"); // link2symlink - vital for Android
-        args.add("--kill-on-exit");
-        args.add("-r"); args.add(rootfs);
-        
-        // System Binds
-        args.add("-b"); args.add("/dev");
-        args.add("-b"); args.add("/proc");
-        args.add("-b"); args.add("/sys");
-        args.add("-b"); args.add("/system");
-        
-        // Data Binds
-        args.add("-b"); args.add(home + ":/root");
-        args.add("-b"); args.add(TerminalInstaller.TMP_PATH + ":/tmp");
-        
-        // Fix for "Function not implemented" on some devices
-        args.add("-w"); args.add("/root");
-        args.add("/bin/bash");
-
-        Map<String, String> envMap = Environment.getEnvironment();
-        envMap.remove("LD_PRELOAD");
 
         TerminalSession session =
                 new TerminalSession(
-                        prootBinary,
-                        TerminalInstaller.DATA_PATH,
-                        args.toArray(new String[0]),
-                        Environment.envToProps(envMap),
-                        1,
+                        "/system/bin/sh",
+                        TerminalInstaller.ROOTFS_PATH,
+                        new String[]{"-c",TerminalInstaller.INIT_HOST_FILE_PATH},
+                        Environment.envToProps(Environment.getEnvironment()),
+                        TerminalEmulator.DEFAULT_TERMINAL_TRANSCRIPT_ROWS,
                         terminalBackend);
 
         binding.terminalView.attachSession(session);
         
     }
 
-    private void setupExtraKeysView() {
-    }
+
 
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(

@@ -202,6 +202,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onEmulatorSet() {
+<<<<<<< HEAD
         if(terminalView.mEmulator != null){
             terminalView.setTerminalCursorBlinkerState(true,true);
             int textColor = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorOnSurface);
@@ -209,6 +210,15 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
             terminalView.mEmulator.mColors.mCurrentColors[257] = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorSurface);
             terminalView.mEmulator.mColors.mCurrentColors[258] = textColor;
         }
+=======
+if (terminalView.mEmulator != null){
+    terminalView.setTerminalCursorBlinkerState(true,true);
+    int textColor = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorOnSurface);
+    terminalView.mEmulator.mColors.mCurrentColors[256] = textColor;
+    terminalView.mEmulator.mColors.mCurrentColors[257] = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorSurface);
+    terminalView.mEmulator.mColors.mCurrentColors[258] = textColor;
+}
+>>>>>>> branch 'main' of https://github.com/omar-haidar/GoTerminal.git
     }
 
     @Override

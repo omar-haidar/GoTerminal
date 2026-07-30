@@ -24,6 +24,10 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent"
            android:layout_weight="1"
+<<<<<<< HEAD
+=======
+           android:background="?colorSurface"
+>>>>>>> branch 'main' of https://github.com/omar-haidar/GoTerminal.git
            android:id="@+id/terminal_view"
            android:focusableInTouchMode="true"
            android:scrollbars="vertical"/>

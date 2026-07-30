@@ -1,6 +1,8 @@
 package dev.omar.goterminal.utils;
 
 import androidx.annotation.NonNull;
+
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,25 +10,36 @@ public final class Environment {
 
     @NonNull
     public static Map<String, String> getEnvironment() {
+        Map<String, String> envVariables = new HashMap<>();
+        envVariables.put("ANDROID_ART_ROOT", System.getenv("ANDROID_ART_ROOT"));
+        envVariables.put("ANDROID_DATA", System.getenv("ANDROID_DATA"));
+        envVariables.put("ANDROID_I18N_ROOT", System.getenv("ANDROID_I18N_ROOT"));
+        envVariables.put("ANDROID_ROOT", System.getenv("ANDROID_ROOT"));
+        envVariables.put("ANDROID_RUNTIME_ROOT", System.getenv("ANDROID_RUNTIME_ROOT"));
+        envVariables.put("ANDROID_TZDATA_ROOT", System.getenv("ANDROID_TZDATA_ROOT"));
+        envVariables.put("BOOTCLASSPATH", System.getenv("BOOTCLASSPATH"));
+        envVariables.put("DEX2OATBOOTCLASSPATH", System.getenv("DEX2OATBOOTCLASSPATH"));
+        envVariables.put("EXTERNAL_STORAGE", System.getenv("EXTERNAL_STORAGE"));
+
         HashMap<String, String> env = new HashMap<>();
-        
-        // Standard Linux environment variables for Ubuntu
-        env.put("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
-        env.put("HOME", "/root");
+        env.putAll(envVariables);
+
+        env.put("PATH", System.getenv("PATH") + ":/bin:/sbin:/usr/bin:/usr/sbin:/usr/share/bin:/usr/share/sbin:/usr/local/bin:/usr/local/sbin:/system/bin:/system/xbin:" + TerminalInstaller.BIN_PATH);
+        env.put("HOME", "/sdcard");
+        env.put("COLORTERM", "truecolor");
         env.put("TERM", "xterm-256color");
-        env.put("LANG", "en_US.UTF-8");
-        env.put("SHELL", "/bin/bash");
-        
-        // Proot specific variables
-        env.put("PROOT_NO_SECCOMP", "1");
-        env.put("PROOT_FORCE_PTRACE_ONLY", "1");
+        env.put("PS1", "\\[\\033[01;32m\\]\\u@reterm\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\");
+        env.put("LANG", "C.UTF-8");
+        env.put("BIN", TerminalInstaller.BIN_PATH);
+        env.put("PREFIX", TerminalInstaller.DATA_PATH);
+        env.put("ROOTFS", TerminalInstaller.ROOTFS_PATH);
+        env.put("LD_LIBRARY_PATH", TerminalInstaller.LIB_PATH);
+        env.put("LINKER", new File("/system/bin/linker64").exists() ? "/system/bin/linker64" : "/system/bin/linker");
         env.put("PROOT_TMP_DIR", TerminalInstaller.TMP_PATH);
-        
-        // Disable APT sandboxing via environment as well
-        env.put("APT_CONFIG", "/etc/apt/apt.conf.d/999-no-sandbox");
-        
-        // Library path for proot dependencies
-        env.put("LD_LIBRARY_PATH", TerminalInstaller.LIB_PATH + ":/lib:/usr/lib");
+        env.put("TMPDIR",TerminalInstaller.TMP_PATH);
+        env.put("PROOT", TerminalInstaller.PROOT_FILE_PATH);
+        env.put("INIT_SCRIPT", TerminalInstaller.INIT_SCRIPT_FILE_PATH);
+        env.put("INIT_HOST_SCRIPT", TerminalInstaller.INIT_HOST_FILE_PATH);
 
         return env;
     }
