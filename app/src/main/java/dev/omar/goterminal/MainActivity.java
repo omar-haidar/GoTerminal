@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.color.MaterialColors;
 import com.termux.terminal.TerminalSession;
 
 import dev.omar.goterminal.databinding.ActivityMainBinding;
@@ -16,6 +17,7 @@ import dev.omar.goterminal.terminal.TerminalBackend;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.ui.settings.SettingsActivity;
 import dev.omar.goterminal.ui.sheet.ProgressSheetDialog;
+import dev.omar.goterminal.utils.Environment;
 import dev.omar.goterminal.utils.TerminalInstaller;
 import dev.omar.goterminal.utils.UiUtils;
 
@@ -47,12 +49,14 @@ public class MainActivity extends EdgeToEdgeActivity {
     }
 
     private void initializeLogic() {
-        ProgressSheetDialog sheetDialog = new ProgressSheetDialog.Builder()
-                .setTitle("Setup")
-                .setMessage("Installing tools ...")
-                .setCancelable(false)
-                .show(getSupportFragmentManager(), "installing-tools");
-        TerminalInstaller.installIfNeeded(this).whenComplete((result, throwable) -> sheetDialog.dismiss());
+        ProgressSheetDialog sheetDialog =
+                new ProgressSheetDialog.Builder()
+                        .setTitle("Setup")
+                        .setMessage("Installing tools ...")
+                        .setCancelable(false)
+                        .show(getSupportFragmentManager(), "installing-tools");
+        TerminalInstaller.installIfNeeded(this)
+                .whenComplete((result, throwable) -> sheetDialog.dismiss());
         setupTerminalView();
         setupExtraKeysView();
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
@@ -60,7 +64,6 @@ public class MainActivity extends EdgeToEdgeActivity {
         /*binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());*/
         binding.imgSettings.setOnClickListener(
                 v -> SettingsActivity.openSettings(MainActivity.this));
-
     }
 
     private void setupTerminalView() {
@@ -68,19 +71,28 @@ public class MainActivity extends EdgeToEdgeActivity {
         terminalBackend.setSessionFinishedListener(session -> finish());
         binding.terminalView.setTerminalViewClient(terminalBackend);
         binding.terminalView.setKeepScreenOn(true);
-        String PATH = System.getenv("PATH");
-        binding.terminalView.attachSession(new TerminalSession(
-                "/system/bin/sh",
-                getFilesDir().getAbsolutePath(),//cwd
-                new String[]{},                 //args
-                new String[]{"PATH=" + TerminalInstaller.BIN_PATH + ":" + PATH},//env
-                1,
-                terminalBackend));
+        if (binding.terminalView.mEmulator != null) {
+            binding.terminalView.mEmulator.mColors.mCurrentColors[256] =
+                    MaterialColors.getColor(
+                            binding.terminalView,
+                            com.google.android.material.R.attr.colorOnSurface);
+            binding.terminalView.mEmulator.mColors.mCurrentColors[258] =
+                    MaterialColors.getColor(
+                            binding.terminalView,
+                            com.google.android.material.R.attr.colorOnSurface);
+        }
+
+        binding.terminalView.attachSession(
+                new TerminalSession(
+                        "/system/bin/sh",
+                        getFilesDir().getAbsolutePath(), // cwd
+                        new String[] {}, // args
+                        Environment.envToProps(Environment.getEnvironment()), // env
+                        1,
+                        terminalBackend));
     }
 
-    private void setupExtraKeysView() {
-
-    }
+    private void setupExtraKeysView() {}
 
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(
@@ -118,6 +130,4 @@ public class MainActivity extends EdgeToEdgeActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 }

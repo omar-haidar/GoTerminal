@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<org.appdevforall.codeonthego.layouteditor.editor.palette.layouts.LinearLayoutDesign
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -10,26 +10,26 @@
 		android:id="@+id/include_toolbar"
 		layout="@layout/toolbar" />
 
-	<LinearLayout
+	<org.appdevforall.codeonthego.layouteditor.editor.palette.layouts.LinearLayoutDesign
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:orientation="vertical"
 		android:gravity="center">
 
-		<androidx.appcompat.widget.AppCompatImageView
+		<com.google.android.material.imageview.ShapeableImageView
 			android:layout_width="100dp"
 			android:layout_height="100dp"
 			android:src="@drawable/ic_comedy_mask"
 			android:layout_marginBottom="16dp"
 			android:scaleType="fitCenter" />
 
-		<androidx.appcompat.widget.AppCompatTextView
+		<com.google.android.material.textview.MaterialTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Not implemented yet!"
 			android:gravity="center"
 			android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
-	</LinearLayout>
+	</org.appdevforall.codeonthego.layouteditor.editor.palette.layouts.LinearLayoutDesign>
 
-</LinearLayout>
+</org.appdevforall.codeonthego.layouteditor.editor.palette.layouts.LinearLayoutDesign>
