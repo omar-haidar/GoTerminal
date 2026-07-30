@@ -1,8 +1,10 @@
 package dev.omar.goterminal.utils;
 
 import android.os.Build;
+
 import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.Nullable;
+
 import java.util.Arrays;
 
 public final class ArchUtils {

@@ -1,16 +1,18 @@
 package dev.omar.goterminal;
 
 import android.app.Application;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
+
 import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.Utils;
+
+import org.lsposed.hiddenapibypass.HiddenApiBypass;
+
 import dev.omar.goterminal.ui.crash.CrashActivity;
 import dev.omar.goterminal.utils.ArchUtils;
-import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 public class App extends Application {
 

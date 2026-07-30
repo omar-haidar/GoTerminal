@@ -1,6 +1,5 @@
 package dev.omar.goterminal.utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,19 +13,24 @@ public class ProotLauncher {
 
         // Link with libtalloc (usually proot needs it in LD_LIBRARY_PATH, 
         // but some proot builds are static or have specific needs)
-        
+
         // Root directory (The unzipped bootstrap)
         command.add("-r");
         command.add(TerminalInstaller.PREFIX_PATH);
 
         // Standard Bindings
-        command.add("-b"); command.add("/dev");
-        command.add("-b"); command.add("/proc");
-        command.add("-b"); command.add("/sys");
-        command.add("-b"); command.add("/data");
-        
+        command.add("-b");
+        command.add("/dev");
+        command.add("-b");
+        command.add("/proc");
+        command.add("-b");
+        command.add("/sys");
+        command.add("-b");
+        command.add("/data");
+
         // Bind SDCARD
-        command.add("-b"); command.add("/sdcard");
+        command.add("-b");
+        command.add("/sdcard");
 
         // Working directory inside the rootfs
         command.add("-w");
@@ -39,7 +43,7 @@ public class ProotLauncher {
 
         return command.toArray(new String[0]);
     }
-    
+
     public static String[] getProotEnv() {
         List<String> env = new ArrayList<>();
         env.add("PATH=/usr/bin:/bin:/usr/sbin:/sbin");

@@ -2,10 +2,11 @@ package dev.omar.goterminal.terminal.factory;
 
 import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
+
 import dev.omar.goterminal.terminal.model.SessionConfig;
 
 public class TerminalSessionFactory {
-    
+
     private final TerminalSessionClient sessionClient;
     private static final int TRANSCRIPT_ROWS = 2000;
 

@@ -7,37 +7,33 @@ import java.util.Map;
 
 public final class Environment {
 
-    private static HashMap<String, String> env = new HashMap<>();
-
     @NonNull
     public static Map<String, String> getEnvironment() {
-        if (env.isEmpty()) {
-            env.put("PATH", createPath());
-            env.put("TERM", "xterm-256color");
-            env.put("COLORTERM", "truecolor");
-            env.put("ROOTFS", TerminalInstaller.ROOTFS_PATH);
-            env.put("HOME", TerminalInstaller.HOME_PATH);
-            env.put("TMPDIR", TerminalInstaller.TMP_PATH);
-            env.put("PROOT_TMP_DIR", TerminalInstaller.TMP_PATH);
-            env.put("LD_LIBRARY_PATH", TerminalInstaller.LIB_PATH+":"+TerminalInstaller.PREFIX_PATH+"/lib");
-        }
+        HashMap<String, String> env = new HashMap<>();
+
+        String prefix = "/data/data/com.termux/files/usr";
+        String home = "/data/data/com.termux/files/home";
+
+        env.put("PATH", prefix + "/bin:" + prefix + "/bin/applets:/system/bin:/system/xbin");
+        env.put("PREFIX", prefix);
+        env.put("HOME", home);
+        env.put("TMPDIR", prefix + "/tmp");
+        env.put("TERM", "xterm-256color");
+        env.put("COLORTERM", "truecolor");
+
+        // إعدادات proot للتعامل مع قيود أندرويد الحديثة
+        env.put("PROOT_NO_SECCOMP", "1");
+        env.put("PROOT_FORCE_PTRACE_ONLY", "1");
+        env.put("PROOT_TMP_DIR", TerminalInstaller.TMP_PATH);
+
+        // مسار المكتبات الشامل (المحلية ونظام أندرويد)
+        env.put("LD_LIBRARY_PATH", TerminalInstaller.LIB_PATH + ":/system/lib64:/system/lib");
+
         return env;
     }
 
-    private static String createPath() {
-        String systemPath = System.getenv("PATH");
-        String path =
-                "/system/bin:"
-                        + "/system/xbin:"
-                        + TerminalInstaller.BIN_PATH
-                        + ":"
-                        + TerminalInstaller.PREFIX_PATH
-                        + "/bin:"
-                        + systemPath;
-        return path;
-    }
-
-    public static String[] envToProps(Map<String, String> environment) {
+    @NonNull
+    public static String[] envToProps(@NonNull Map<String, String> environment) {
         String[] env = new String[environment.size()];
         int index = 0;
         for (Map.Entry<String, String> entry : environment.entrySet()) {
@@ -45,12 +41,5 @@ public final class Environment {
             index++;
         }
         return env;
-    }
-
-    public static void addToEnvIfPresent(Map<String, String> environment, String name) {
-        String value = System.getenv(name);
-        if (value != null) {
-            environment.put(name, value);
-        }
     }
 }

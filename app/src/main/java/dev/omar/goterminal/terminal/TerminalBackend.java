@@ -54,11 +54,11 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onSessionFinished(TerminalSession finishedSession) {
-        if (confirmFinish){
+        if (confirmFinish) {
             if (sessionFinishedListener != null) {
                 sessionFinishedListener.onSessionFinished(finishedSession);
             }
-        }else {
+        } else {
             confirmFinish = true;
         }
 

@@ -8,20 +8,14 @@ import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ResourceUtils;
-import com.blankj.utilcode.util.ZipUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -33,7 +27,7 @@ public class TerminalInstaller {
     public static final String HOME_PATH = DATA_PATH + "/home";
     public static final String BIN_PATH = DATA_PATH + "/bin";
     public static final String LIB_PATH = DATA_PATH + "/lib";
-    public static final String TMP_PATH = PREFIX_PATH + "/tmp";
+    public static final String TMP_PATH = DATA_PATH + "/tmp";
 
     public static final String PROOT_FILE_PATH = BIN_PATH + "/proot";
     public static final String BUSYBOX_FILE_PATH = BIN_PATH + "/busybox";
@@ -53,7 +47,7 @@ public class TerminalInstaller {
         return ArchUtils.getArch().concat("/").concat(name);
     }
 
-    private static Result extractBootstrap(Context context) {
+    private static Result extractBootstrap(@NonNull Context context) {
         try {
             // Create directories
             FileUtils.createOrExistsDir(ROOTFS_PATH);
@@ -61,6 +55,11 @@ public class TerminalInstaller {
             FileUtils.createOrExistsDir(HOME_PATH);
             FileUtils.createOrExistsDir(BIN_PATH);
             FileUtils.createOrExistsDir(LIB_PATH);
+            FileUtils.createOrExistsDir(TMP_PATH);
+
+            // Ensure directory for login/bash exists in guest path
+            FileUtils.createOrExistsDir(PREFIX_PATH + "/bin");
+            FileUtils.createOrExistsDir(PREFIX_PATH + "/tmp");
 
             // Copy Binaries
             ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
@@ -79,6 +78,7 @@ public class TerminalInstaller {
             // Set Permissions
             Os.chmod(PROOT_FILE_PATH, 0777);
             Os.chmod(BUSYBOX_FILE_PATH, 0777);
+            Os.chmod(LIB_PATH + "/libtalloc.so.2", 0755);
 
             // Create marker
             File marker = new File(INSTALLED_TERMINAL_MARKER_FILE_PATH);
@@ -92,94 +92,84 @@ public class TerminalInstaller {
     }
 
     private static Result extractBootstrapArchive(File bootstrapFile) {
-        try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(bootstrapFile));
-            final byte[] buffer = new byte[8096];
-            final List<LinkedPath> symlinks = new ArrayList<LinkedPath>(50);
+        final List<LinkedPath> symlinks = new ArrayList<>(128);
+        final byte[] buffer = new byte[16384];
+
+        try (ZipInputStream zipStream = new ZipInputStream(new FileInputStream(bootstrapFile))) {
             ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
-                if (entry.getName().equals("SYMLINKS.txt")) {
-                    final BufferedReader symlinksReader =
-                            new BufferedReader(new InputStreamReader(zip));
-                    String line;
-                    while ((line = symlinksReader.readLine()) != null) {
+            while ((entry = zipStream.getNextEntry()) != null) {
+                String entryName = entry.getName();
+
+                if (entryName.equals("SYMLINKS.txt")) {
+                    StringBuilder sb = new StringBuilder();
+                    int read;
+                    byte[] symBuffer = new byte[4096];
+                    while ((read = zipStream.read(symBuffer)) != -1) {
+                        sb.append(new String(symBuffer, 0, read));
+                    }
+
+                    for (String line : sb.toString().split("\n")) {
+                        line = line.trim();
+                        if (line.isEmpty()) continue;
                         String[] parts = line.split("←");
-                        if (parts.length != 2) {
-                            final var err = "Malformed symlink line: " + line;
-
-                            return new Result(false, err);
-                        }
-                        String oldPath = parts[0];
-                        String newPath = PREFIX_PATH + "/" + parts[1];
-                        symlinks.add(new LinkedPath(oldPath, newPath));
-
-                        final File parentFile = new File(newPath).getParentFile();
-                        if (!FileUtils.createOrExistsDir(parentFile)) {
-
-                            throw new IOException("Unable to create directory: " + parentFile);
+                        if (parts.length == 2) {
+                            symlinks.add(new LinkedPath(parts[0], PREFIX_PATH + "/" + parts[1]));
                         }
                     }
                 } else {
-                    String zipEntryName = entry.getName();
-                    File targetFile = new File(PREFIX_PATH, zipEntryName);
-                    boolean isDirectory = entry.isDirectory();
+                    File targetFile = new File(PREFIX_PATH, entryName);
 
-                    final var dir = isDirectory ? targetFile : targetFile.getParentFile();
-                    if (dir != null && !dir.exists() && !dir.mkdirs()) {
-
-                        throw new IOException("Unable to create directory: " + dir);
-                    }
-
-                    // If the file exists and it is not a directory
-                    // Delete that file
-                    final var targetFilePath = targetFile.toPath();
-                    if (Files.exists(targetFilePath) && !Files.isDirectory(targetFilePath)) {
-                        try {
-                            Files.delete(targetFilePath);
-                        } catch (Throwable th) {
-                            throw new CompletionException(th);
+                    if (entry.isDirectory()) {
+                        if (!targetFile.exists() && !targetFile.mkdirs()) {
+                            throw new IOException("Failed to create directory: " + targetFile);
                         }
-                    }
-
-                    if (!isDirectory) {
-                        try (final var outStream = new FileOutputStream(targetFile)) {
-                            int readBytes;
-                            while ((readBytes = zip.read(buffer)) != -1)
-                                outStream.write(buffer, 0, readBytes);
+                    } else {
+                        File parent = targetFile.getParentFile();
+                        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                            throw new IOException("Failed to create parent: " + parent);
                         }
 
-                        if (zipEntryName.startsWith("bin/")
-                                || zipEntryName.startsWith("libexec")
-                                || zipEntryName.startsWith("lib/apt/apt-helper")
-                                || zipEntryName.startsWith("lib/apt/methods")) {
+                        try (FileOutputStream outStream = new FileOutputStream(targetFile)) {
+                            int len;
+                            while ((len = zipStream.read(buffer)) != -1) {
+                                outStream.write(buffer, 0, len);
+                            }
+                        }
 
-                            //noinspection OctalInteger
+                        if (shouldSetExecutable(entryName)) {
                             Os.chmod(targetFile.getAbsolutePath(), 0700);
                         }
                     }
                 }
-                if (symlinks.isEmpty()) {
+                zipStream.closeEntry();
+            }
 
-                    throw new IOException(("No SYMLINKS.txt encountered"));
+            // Create Symlinks after all files are extracted
+            for (LinkedPath symlink : symlinks) {
+                File linkFile = new File(symlink.newPath);
+                if (linkFile.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    linkFile.delete();
                 }
-
-                for (LinkedPath symlink : symlinks) {
-
-                    final var target = Paths.get(symlink.newPath);
-                    if (Files.exists(target) && !Files.isDirectory(target)) {
-                        try {
-                            Files.delete(target);
-                        } catch (Throwable throwable) {
-                            throw new CompletionException(throwable);
-                        }
-                    }
+                try {
                     Os.symlink(symlink.oldPath, symlink.newPath);
+                } catch (ErrnoException ignored) {
                 }
             }
-            return new Result(true, "");
-        } catch (Exception err) {
-            return new Result(false, err.getMessage());
+
+            return new Result(true, "Bootstrap extracted successfully");
+        } catch (Exception e) {
+            return new Result(false, "Extraction error: " + e.getMessage());
         }
+    }
+
+    private static boolean shouldSetExecutable(@NonNull String path) {
+        return path.contains("/bin/") ||
+                path.contains("/libexec/") ||
+                path.contains("/lib/apt/methods/") ||
+                path.endsWith("/login") ||
+                path.endsWith("/bash") ||
+                path.endsWith("/sh");
     }
 
     public static class LinkedPath {

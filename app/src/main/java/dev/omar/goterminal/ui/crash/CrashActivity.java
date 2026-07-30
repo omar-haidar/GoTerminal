@@ -1,13 +1,10 @@
 package dev.omar.goterminal.ui.crash;
 
 import android.app.Application;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blankj.utilcode.util.ClipboardUtils;
@@ -36,7 +33,7 @@ public final class CrashActivity extends AppCompatActivity {
     }
 
     private void copyCrashMessage() {
-        ClipboardUtils.copyText("Goterminal",message);
+        ClipboardUtils.copyText("Goterminal", message);
         finish();
 
     }

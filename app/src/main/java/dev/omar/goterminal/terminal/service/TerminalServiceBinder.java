@@ -4,6 +4,7 @@ import android.os.Binder;
 
 public class TerminalServiceBinder extends Binder {
     private TerminalService service;
+
     public TerminalServiceBinder(TerminalService service) {
         this.service = service;
     }

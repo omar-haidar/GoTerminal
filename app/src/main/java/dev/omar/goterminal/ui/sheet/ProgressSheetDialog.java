@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
@@ -156,7 +155,7 @@ public class ProgressSheetDialog extends BottomSheetDialogFragment {
 
     @Override
     public void dismiss() {
-        new Handler(Looper.getMainLooper()).post(()->{
+        new Handler(Looper.getMainLooper()).post(() -> {
             super.dismiss();
         });
 

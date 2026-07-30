@@ -4,13 +4,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.color.MaterialColors;
 import com.termux.terminal.TerminalSession;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import dev.omar.goterminal.R;
 
 public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.SessionViewHolder> {
@@ -21,6 +25,7 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
 
     public interface OnSessionClickListener {
         void onSessionClick(int position);
+
         void onSessionDelete(TerminalSession session);
     }
 
@@ -52,14 +57,14 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
     public void onBindViewHolder(@NonNull SessionViewHolder holder, int position) {
         TerminalSession session = sessions.get(position);
         holder.title.setText(session.mSessionName != null ? session.mSessionName : "Session " + (position + 1));
-        
+
         boolean isSelected = position == selectedPosition;
-        
-        int bgColor = isSelected ? 
+
+        int bgColor = isSelected ?
                 MaterialColors.getColor(holder.itemView, com.google.android.material.R.attr.colorSecondaryContainer) :
                 android.graphics.Color.TRANSPARENT;
-        
-        int strokeColor = isSelected ? 
+
+        int strokeColor = isSelected ?
                 MaterialColors.getColor(holder.itemView, com.google.android.material.R.attr.colorSecondaryContainer) :
                 MaterialColors.getColor(holder.itemView, com.google.android.material.R.attr.colorOutlineVariant);
 

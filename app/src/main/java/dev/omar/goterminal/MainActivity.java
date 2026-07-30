@@ -9,8 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.color.MaterialColors;
 import com.termux.terminal.TerminalSession;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.terminal.TerminalBackend;
@@ -71,28 +74,58 @@ public class MainActivity extends EdgeToEdgeActivity {
         terminalBackend.setSessionFinishedListener(session -> finish());
         binding.terminalView.setTerminalViewClient(terminalBackend);
         binding.terminalView.setKeepScreenOn(true);
-        if (binding.terminalView.mEmulator != null) {
-            binding.terminalView.mEmulator.mColors.mCurrentColors[256] =
-                    MaterialColors.getColor(
-                            binding.terminalView,
-                            com.google.android.material.R.attr.colorOnSurface);
-            binding.terminalView.mEmulator.mColors.mCurrentColors[258] =
-                    MaterialColors.getColor(
-                            binding.terminalView,
-                            com.google.android.material.R.attr.colorOnSurface);
-        }
 
-        binding.terminalView.attachSession(
+        String prootBinary = TerminalInstaller.PROOT_FILE_PATH;
+        String rootfs = TerminalInstaller.ROOTFS_PATH;
+        String prefix = TerminalInstaller.PREFIX_PATH;
+        String home = TerminalInstaller.HOME_PATH;
+
+        List<String> args = new ArrayList<>();
+        args.add(prootBinary);
+        args.add("-i");
+        args.add("0:0");
+        args.add("-l");
+        args.add("-r");
+        args.add(rootfs);
+
+        args.add("-b");
+        args.add("/dev");
+        args.add("-b");
+        args.add("/proc");
+        args.add("-b");
+        args.add("/sys");
+        args.add("-b");
+        args.add("/system");
+        args.add("-b");
+        args.add(prefix + ":/data/data/com.termux/files/usr");
+        args.add("-b");
+        args.add(home + ":/data/data/com.termux/files/home");
+        args.add("-b");
+        args.add(TerminalInstaller.TMP_PATH + ":/data/data/com.termux/files/usr/tmp");
+
+        args.add("-w");
+        args.add(TerminalInstaller.HOME_PATH);
+
+
+        Map<String, String> envMap = Environment.getEnvironment();
+        envMap.remove("LD_PRELOAD");
+
+        TerminalSession session =
                 new TerminalSession(
-                        "/system/bin/sh",
-                        getFilesDir().getAbsolutePath(), // cwd
-                        new String[] {}, // args
-                        Environment.envToProps(Environment.getEnvironment()), // env
-                        1,
-                        terminalBackend));
+                        prootBinary,
+                        home,
+                        args.toArray(new String[0]),
+                        Environment.envToProps(envMap),
+                        1000,
+                        terminalBackend);
+
+        binding.terminalView.attachSession(session);
+
+
     }
 
-    private void setupExtraKeysView() {}
+    private void setupExtraKeysView() {
+    }
 
     private void setupLayoutInsets() {
         UiUtils.addSystemWindowInsetToPadding(

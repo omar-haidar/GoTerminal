@@ -22,7 +22,7 @@ import dev.omar.goterminal.terminal.service.TerminalService;
 import dev.omar.goterminal.terminal.service.TerminalServiceBinder;
 
 public class MainViewModel extends AndroidViewModel {
-    
+
     private final MutableLiveData<TerminalService> terminalService = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isBound = new MutableLiveData<>(false);
     private final MediatorLiveData<List<TerminalSession>> sessions = new MediatorLiveData<>();
@@ -35,7 +35,7 @@ public class MainViewModel extends AndroidViewModel {
             TerminalService s = binder.getService();
             terminalService.setValue(s);
             isBound.setValue(true);
-            
+
             if (currentServiceSessions != null) {
                 sessions.removeSource(currentServiceSessions);
             }
@@ -47,7 +47,7 @@ public class MainViewModel extends AndroidViewModel {
         public void onServiceDisconnected(ComponentName name) {
             terminalService.setValue(null);
             isBound.setValue(false);
-            
+
             if (currentServiceSessions != null) {
                 sessions.removeSource(currentServiceSessions);
                 currentServiceSessions = null;
@@ -75,7 +75,7 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<Boolean> getIsBound() {
         return isBound;
     }
-    
+
     public LiveData<List<TerminalSession>> getSessions() {
         return sessions;
     }
@@ -85,13 +85,13 @@ public class MainViewModel extends AndroidViewModel {
             //terminalService.getValue().createNewSession();
         }
     }
-    
+
     public void removeSession(TerminalSession session) {
         if (Boolean.TRUE.equals(isBound.getValue()) && terminalService.getValue() != null) {
             //terminalService.getValue().removeSession(session);
         }
     }
-    
+
     public TerminalBackend getTerminalBackend() {
         return /*terminalService.getValue() != null ? terminalService.getValue().getTerminalBackend() :*/ null;
     }
@@ -103,7 +103,7 @@ public class MainViewModel extends AndroidViewModel {
             getApplication().unbindService(serviceConnection);
             isBound.setValue(false);
         }
-        
+
         if (currentServiceSessions != null) {
             sessions.removeSource(currentServiceSessions);
         }
