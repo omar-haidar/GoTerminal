@@ -113,6 +113,7 @@ public class MainActivity extends EdgeToEdgeActivity {
                         terminalBackend);
 
         binding.terminalView.attachSession(session);
+        
     }
 
     private void setupExtraKeysView() {

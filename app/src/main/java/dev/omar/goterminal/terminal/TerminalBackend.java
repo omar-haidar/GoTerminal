@@ -1,5 +1,7 @@
 package dev.omar.goterminal.terminal;
 
+import android.graphics.Color;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -7,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.ClipboardUtils;
 import com.blankj.utilcode.util.KeyboardUtils;
+import com.google.android.material.color.MaterialColors;
 import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSessionClient;
@@ -71,7 +74,10 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onPasteTextFromClipboard(TerminalSession session) {
-
+        var clip = ClipboardUtils.getText().toString();
+        if(!clip.trim().isEmpty() && terminalView.mEmulator != null){
+            terminalView.mEmulator.paste(clip);
+        }
     }
 
     @Override
@@ -196,7 +202,13 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onEmulatorSet() {
-
+        if(terminalView.mEmulator != null){
+            terminalView.setTerminalCursorBlinkerState(true,true);
+            int textColor = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorOnSurface);
+            terminalView.mEmulator.mColors.mCurrentColors[256] = textColor;
+            terminalView.mEmulator.mColors.mCurrentColors[257] = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorSurface);
+            terminalView.mEmulator.mColors.mCurrentColors[258] = textColor;
+        }
     }
 
     @Override
