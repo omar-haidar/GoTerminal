@@ -77,35 +77,28 @@ public class MainActivity extends EdgeToEdgeActivity {
 
         String prootBinary = TerminalInstaller.PROOT_FILE_PATH;
         String rootfs = TerminalInstaller.ROOTFS_PATH;
-        String prefix = TerminalInstaller.PREFIX_PATH;
         String home = TerminalInstaller.HOME_PATH;
 
         List<String> args = new ArrayList<>();
         args.add(prootBinary);
-        args.add("-i");
-        args.add("0:0");
-        args.add("-l");
-        args.add("-r");
-        args.add(rootfs);
-
-        args.add("-b");
-        args.add("/dev");
-        args.add("-b");
-        args.add("/proc");
-        args.add("-b");
-        args.add("/sys");
-        args.add("-b");
-        args.add("/system");
-        args.add("-b");
-        args.add(prefix + ":/data/data/com.termux/files/usr");
-        args.add("-b");
-        args.add(home + ":/data/data/com.termux/files/home");
-        args.add("-b");
-        args.add(TerminalInstaller.TMP_PATH + ":/data/data/com.termux/files/usr/tmp");
-
-        args.add("-w");
-        args.add(TerminalInstaller.HOME_PATH);
-
+        args.add("-0"); // Fake root
+        args.add("-l"); // link2symlink - vital for Android
+        args.add("--kill-on-exit");
+        args.add("-r"); args.add(rootfs);
+        
+        // System Binds
+        args.add("-b"); args.add("/dev");
+        args.add("-b"); args.add("/proc");
+        args.add("-b"); args.add("/sys");
+        args.add("-b"); args.add("/system");
+        
+        // Data Binds
+        args.add("-b"); args.add(home + ":/root");
+        args.add("-b"); args.add(TerminalInstaller.TMP_PATH + ":/tmp");
+        
+        // Fix for "Function not implemented" on some devices
+        args.add("-w"); args.add("/root");
+        args.add("/bin/bash");
 
         Map<String, String> envMap = Environment.getEnvironment();
         envMap.remove("LD_PRELOAD");
@@ -113,15 +106,13 @@ public class MainActivity extends EdgeToEdgeActivity {
         TerminalSession session =
                 new TerminalSession(
                         prootBinary,
-                        home,
+                        TerminalInstaller.DATA_PATH,
                         args.toArray(new String[0]),
                         Environment.envToProps(envMap),
-                        1000,
+                        1,
                         terminalBackend);
 
         binding.terminalView.attachSession(session);
-
-
     }
 
     private void setupExtraKeysView() {
