@@ -22,7 +22,8 @@ import java.util.zip.ZipInputStream;
 public class TerminalInstaller {
 
     public static final String DATA_PATH = "/data/data/dev.omar.goterminal/files";
-    public static final String ROOTFS_PATH = "/data/data/dev.omar.goterminal/files/rootfs";
+    public static final String ROOTFS_PATH =
+            "/data/data/dev.omar.goterminal/files/rootfs/ubuntu-jammy-aarch64";
     public static final String PREFIX_PATH = ROOTFS_PATH + "/data/data/com.termux/files/usr";
     public static final String HOME_PATH = DATA_PATH + "/home";
     public static final String BIN_PATH = DATA_PATH + "/bin";
@@ -68,11 +69,16 @@ public class TerminalInstaller {
                     getCompatAsset("libtalloc.so.2"), LIB_PATH + "/libtalloc.so.2");
 
             // Extract Bootstrap to usr
-            File bootstrapZip = new File(context.getCacheDir(), "bootstrap.zip");
+            File bootstrapZip = new File(context.getCacheDir(), "ubuntu.tar.xz");
             ResourceUtils.copyFileFromAssets(
-                    getCompatAsset("bootstrap.zip"), bootstrapZip.getAbsolutePath());
-            var result = extractBootstrapArchive(bootstrapZip);
-            if (!result.success) return result;
+                    getCompatAsset("ubuntu.tar.xz"), bootstrapZip.getAbsolutePath());
+            Runtime.getRuntime()
+                    .exec(
+                            BUSYBOX_FILE_PATH
+                                    + "tar xvJf "
+                                    + bootstrapZip.getAbsolutePath()
+                                    + " -d "
+                                    + new File(ROOTFS_PATH).getParent());
             bootstrapZip.delete();
 
             // Set Permissions
@@ -164,12 +170,12 @@ public class TerminalInstaller {
     }
 
     private static boolean shouldSetExecutable(@NonNull String path) {
-        return path.contains("/bin/") ||
-                path.contains("/libexec/") ||
-                path.contains("/lib/apt/methods/") ||
-                path.endsWith("/login") ||
-                path.endsWith("/bash") ||
-                path.endsWith("/sh");
+        return path.contains("/bin/")
+                || path.contains("/libexec/")
+                || path.contains("/lib/apt/methods/")
+                || path.endsWith("/login")
+                || path.endsWith("/bash")
+                || path.endsWith("/sh");
     }
 
     public static class LinkedPath {
