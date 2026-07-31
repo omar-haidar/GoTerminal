@@ -19,7 +19,7 @@ import com.termux.view.TerminalViewClient;
 public class TerminalBackend implements TerminalViewClient, TerminalSessionClient {
 
     private TerminalView terminalView;
-    private int terminalTextSize = 18;
+    private int terminalTextSize = 24;
 
     public int getTerminalTextSize() {
         return terminalTextSize;
@@ -51,9 +51,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
     }
 
     @Override
-    public void onTitleChanged(TerminalSession changedSession) {
-
-    }
+    public void onTitleChanged(TerminalSession changedSession) {}
 
     @Override
     public void onSessionFinished(TerminalSession finishedSession) {
@@ -64,7 +62,6 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
         } else {
             confirmFinish = true;
         }
-
     }
 
     @Override
@@ -75,25 +72,19 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
     @Override
     public void onPasteTextFromClipboard(TerminalSession session) {
         var clip = ClipboardUtils.getText().toString();
-        if(!clip.trim().isEmpty() && terminalView.mEmulator != null){
+        if (!clip.trim().isEmpty() && terminalView.mEmulator != null) {
             terminalView.mEmulator.paste(clip);
         }
     }
 
     @Override
-    public void onBell(TerminalSession session) {
-
-    }
+    public void onBell(TerminalSession session) {}
 
     @Override
-    public void onColorsChanged(TerminalSession session) {
-
-    }
+    public void onColorsChanged(TerminalSession session) {}
 
     @Override
-    public void onTerminalCursorStateChange(boolean state) {
-
-    }
+    public void onTerminalCursorStateChange(boolean state) {}
 
     @Override
     public Integer getTerminalCursorStyle() {
@@ -112,7 +103,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     private void changeFont(boolean increase) {
         terminalTextSize += (increase ? 1 : -1) * 2;
-        terminalTextSize = Math.max(16, Math.min(terminalTextSize, 32));
+        terminalTextSize = Math.max(24, Math.min(terminalTextSize, 64));
         terminalView.setTextSize(terminalTextSize);
     }
 
@@ -147,9 +138,7 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
     }
 
     @Override
-    public void copyModeChanged(boolean copyMode) {
-
-    }
+    public void copyModeChanged(boolean copyMode) {}
 
     private boolean confirmFinish = false;
 
@@ -202,57 +191,38 @@ public class TerminalBackend implements TerminalViewClient, TerminalSessionClien
 
     @Override
     public void onEmulatorSet() {
-<<<<<<< HEAD
-        if(terminalView.mEmulator != null){
-            terminalView.setTerminalCursorBlinkerState(true,true);
-            int textColor = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorOnSurface);
+
+        if (terminalView.mEmulator != null) {
+            terminalView.setTerminalCursorBlinkerState(true, true);
+            int textColor =
+                    MaterialColors.getColor(
+                            terminalView, com.google.android.material.R.attr.colorOnSurface);
             terminalView.mEmulator.mColors.mCurrentColors[256] = textColor;
-            terminalView.mEmulator.mColors.mCurrentColors[257] = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorSurface);
+            terminalView.mEmulator.mColors.mCurrentColors[257] =
+                    MaterialColors.getColor(
+                            terminalView, com.google.android.material.R.attr.colorSurface);
             terminalView.mEmulator.mColors.mCurrentColors[258] = textColor;
         }
-=======
-if (terminalView.mEmulator != null){
-    terminalView.setTerminalCursorBlinkerState(true,true);
-    int textColor = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorOnSurface);
-    terminalView.mEmulator.mColors.mCurrentColors[256] = textColor;
-    terminalView.mEmulator.mColors.mCurrentColors[257] = MaterialColors.getColor(terminalView,com.google.android.material.R.attr.colorSurface);
-    terminalView.mEmulator.mColors.mCurrentColors[258] = textColor;
-}
->>>>>>> branch 'main' of https://github.com/omar-haidar/GoTerminal.git
     }
 
     @Override
-    public void logError(String tag, String message) {
-
-    }
+    public void logError(String tag, String message) {}
 
     @Override
-    public void logWarn(String tag, String message) {
-
-    }
+    public void logWarn(String tag, String message) {}
 
     @Override
-    public void logInfo(String tag, String message) {
-
-    }
+    public void logInfo(String tag, String message) {}
 
     @Override
-    public void logDebug(String tag, String message) {
-
-    }
+    public void logDebug(String tag, String message) {}
 
     @Override
-    public void logVerbose(String tag, String message) {
-
-    }
+    public void logVerbose(String tag, String message) {}
 
     @Override
-    public void logStackTraceWithMessage(String tag, String message, Exception e) {
-
-    }
+    public void logStackTraceWithMessage(String tag, String message, Exception e) {}
 
     @Override
-    public void logStackTrace(String tag, Exception e) {
-
-    }
+    public void logStackTrace(String tag, Exception e) {}
 }

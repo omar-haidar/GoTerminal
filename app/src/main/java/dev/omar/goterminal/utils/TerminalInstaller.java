@@ -26,14 +26,37 @@ public class TerminalInstaller {
     public static final String BUSYBOX_FILE_PATH = BIN_PATH + "/busybox";
     public static final String INIT_SCRIPT_FILE_PATH = BIN_PATH + "/init";
     public static final String INIT_HOST_FILE_PATH = BIN_PATH + "/init-host";
+    public static final String UTILS_SCRIPT_FILE_PATH = BIN_PATH + "/utils";
 
     private static final String INSTALLED_MARKER_FILE_PATH = ROOTFS_PATH + "/.installed";
 
     public static CompletableFuture<Result> installIfNeeded(Context context) {
-        if (new File(INSTALLED_MARKER_FILE_PATH).exists()) {
-            return CompletableFuture.completedFuture(new Result(true, "Already installed"));
-        }
-        return CompletableFuture.supplyAsync(() -> extractUbuntu(context));
+        return extractInitScript()
+                .thenApply(
+                        t -> {
+                            if (new File(INSTALLED_MARKER_FILE_PATH).exists()) {
+                                return (new Result(true, "Already installed"));
+                            }
+                            return extractUbuntu(context);
+                        });
+
+    }
+
+    private static CompletableFuture<Result> extractInitScript() {
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    try {
+                        ResourceUtils.copyFileFromAssets("scripts/init.sh", INIT_SCRIPT_FILE_PATH);
+                        ResourceUtils.copyFileFromAssets("scripts/init-host.sh", INIT_HOST_FILE_PATH);
+                        ResourceUtils.copyFileFromAssets("scripts/utils.sh", UTILS_SCRIPT_FILE_PATH);
+                        Os.chmod(INIT_SCRIPT_FILE_PATH, 0777);
+                        Os.chmod(INIT_HOST_FILE_PATH, 0777);
+                        Os.chmod(UTILS_SCRIPT_FILE_PATH, 0777);
+                        return new Result(true, "Scripts-installed!");
+                    } catch (Exception err) {
+                        return new Result(false, err.getMessage());
+                    }
+                });
     }
 
     @NonNull
@@ -74,10 +97,17 @@ public class TerminalInstaller {
             ResourceUtils.copyFileFromAssets(
                     getCompatAsset("ubuntu.tar.xz"), ubuntuTar.getAbsolutePath());
 
-            Process process = new ProcessBuilder()
-                    .command(BUSYBOX_FILE_PATH, "tar", "-xJf", ubuntuTar.getAbsolutePath(), "-C", new File(ROOTFS_PATH).getParent())
-                    .redirectErrorStream(true)
-                    .start();
+            Process process =
+                    new ProcessBuilder()
+                            .command(
+                                    BUSYBOX_FILE_PATH,
+                                    "tar",
+                                    "-xJf",
+                                    ubuntuTar.getAbsolutePath(),
+                                    "-C",
+                                    new File(ROOTFS_PATH).getParent())
+                            .redirectErrorStream(true)
+                            .start();
 
             int exitCode = process.waitFor();
             ResourceUtils.copyFileFromAssets("resolv.conf", ROOTFS_PATH + "/etc/resolv.conf");
@@ -87,12 +117,7 @@ public class TerminalInstaller {
                 return new Result(false, "Extraction failed with exit code: " + exitCode);
             }
 
-
-            // Fix APT Sandbox issues in Ubuntu
-//            File aptConfig = new File(ROOTFS_PATH, "etc/apt/apt.conf.d/999-no-sandbox");
-//            if (!aptConfig.getParentFile().exists()) aptConfig.getParentFile().mkdirs();
-//            com.blankj.utilcode.util.FileIOUtils.writeFileFromString(aptConfig, "APT::Sandbox::User \"root\";\n");
-
+            
             // Create marker
             File marker = new File(INSTALLED_MARKER_FILE_PATH);
             if (!marker.getParentFile().exists()) marker.getParentFile().mkdirs();

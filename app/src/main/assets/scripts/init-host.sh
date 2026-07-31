@@ -63,4 +63,4 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
-$PROOT $ARGS #sh $INIT_SCRIPT "$@"
+$PROOT $ARGS /bin/bash #sh $INIT_SCRIPT "$@"
