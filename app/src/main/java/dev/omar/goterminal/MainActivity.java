@@ -12,10 +12,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.terminal.TerminalBackend;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
@@ -61,7 +57,7 @@ public class MainActivity extends EdgeToEdgeActivity {
                         .show(getSupportFragmentManager(), "installing-tools");
         TerminalInstaller.installIfNeeded(this)
                 .whenComplete((result, throwable) -> {
-                    runOnUiThread(()->{
+                    runOnUiThread(() -> {
                         setupTerminalView();
                     });
                     sheetDialog.dismiss();
@@ -84,17 +80,16 @@ public class MainActivity extends EdgeToEdgeActivity {
 
         TerminalSession session =
                 new TerminalSession(
-                        "/system/bin/sh",
+                        TerminalInstaller.BASH_FILE_PATH,
                         TerminalInstaller.ROOTFS_PATH,
-                        new String[]{"-c",TerminalInstaller.INIT_HOST_FILE_PATH},
+                        new String[]{"-c", TerminalInstaller.INIT_HOST_FILE_PATH},
                         Environment.envToProps(Environment.getEnvironment()),
                         TerminalEmulator.DEFAULT_TERMINAL_TRANSCRIPT_ROWS,
                         terminalBackend);
 
         binding.terminalView.attachSession(session);
-        
-    }
 
+    }
 
 
     private void setupLayoutInsets() {
