@@ -36,7 +36,7 @@ public class TerminalDocumentsProvider extends DocumentsProvider {
 
     private static final String ALL_MIME_TYPES = "*/*";
 
-    private static final File BASE_DIR = new File("/data/data/dev.omar.goterminal/files");
+    private static final File BASE_DIR = new File("/data/data/dev.omar.goterminal");
 
 
     // The default columns to return information about a root if no specific

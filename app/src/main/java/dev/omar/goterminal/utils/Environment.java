@@ -8,6 +8,24 @@ import java.util.Map;
 
 public final class Environment {
 
+    public static final String DATA_PATH = "/data/data/dev.omar.goterminal/files";
+    public static final String CACHE_PATH = "/data/data/dev.omar.goterminal/cache";
+    public static final String ROOTFS_PATH = DATA_PATH + "/rootfs";
+    public static final String BASH_FILE_PATH = ROOTFS_PATH + "/bin/sh";
+    public static final String HOME_PATH = DATA_PATH + "/home";
+    public static final String LOCAL_PATH = DATA_PATH + "/local";
+    public static final String BIN_PATH = DATA_PATH + "/bin";
+    public static final String LIB_PATH = DATA_PATH + "/lib";
+    public static final String LIBTALLOC_FILE_PATH = LIB_PATH + "/libtalloc.so.2";
+    public static final String TMP_PATH = ROOTFS_PATH + "/tmp";
+    public static final String PROOT_FILE_PATH = BIN_PATH + "/proot";
+    public static final String BUSYBOX_FILE_PATH = BIN_PATH + "/busybox";
+    public static final String INIT_SCRIPT_FILE_PATH = BIN_PATH + "/init";
+    public static final String INIT_HOST_FILE_PATH = BIN_PATH + "/init-host";
+    public static final String UTILS_SCRIPT_FILE_PATH = BIN_PATH + "/utils";
+
+    private static final String INSTALLED_MARKER_FILE_PATH = ROOTFS_PATH + "/.installed";
+
     @NonNull
     public static Map<String, String> getEnvironment() {
         Map<String, String> envVariables = new HashMap<>();

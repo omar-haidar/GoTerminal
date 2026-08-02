@@ -5,15 +5,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
 
@@ -45,7 +44,6 @@ public class MainActivity extends EdgeToEdgeActivity implements ServiceConnectio
 
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
-    private MainViewModel mainViewModel;
     private TerminalBackend terminalBackend;
 
     private TerminalService terminalService;
@@ -60,25 +58,41 @@ public class MainActivity extends EdgeToEdgeActivity implements ServiceConnectio
         setupLayoutInsets();
         setupToolbar();
         initializeLogic();
+
     }
 
+
     private void initializeLogic() {
+
         ProgressSheetDialog sheetDialog =
                 new ProgressSheetDialog.Builder()
                         .setTitle("Setup")
                         .setMessage("Installing tools ...")
-                        .setCancelable(false)
-                        .show(getSupportFragmentManager(), "installing-tools");
+                        .setCancelable(false).create();
+        sheetDialog.show(getSupportFragmentManager(), "Installer");
         TerminalInstaller.installIfNeeded(this)
                 .whenComplete((result, throwable) -> {
                     runOnUiThread(() -> {
-                        setupTerminalView();
+                        if (result.isSuccess()) {
+                            setupTerminalView();
+
+                        } else {
+                            new MaterialAlertDialogBuilder(MainActivity.this)
+                                    .setTitle("Installation failed")
+                                    .setMessage(result.getMessage())
+                                    .setCancelable(false)
+                                    .setPositiveButton("Exit", (d, i) -> {
+                                        finish();
+                                    })
+                                    .create()
+                                    .show();
+                        }
+
                     });
                     sheetDialog.dismiss();
                 });
 
 
-        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         /*binding.imgAddSession.setOnClickListener(v -> mainViewModel.addNewSession());*/
         binding.imgSettings.setOnClickListener(
@@ -159,7 +173,7 @@ public class MainActivity extends EdgeToEdgeActivity implements ServiceConnectio
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
         isBound = false;
-        Log.i(TAG, "onServiceDisconnected");
+
     }
 
     @Override

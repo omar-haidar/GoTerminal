@@ -9,14 +9,19 @@ import androidx.annotation.NonNull;
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ResourceUtils;
 
+import org.jetbrains.annotations.Contract;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+import dev.omar.goterminal.ui.sheet.ProgressSheetDialog;
+
 public class TerminalInstaller {
 
     public static final String DATA_PATH = "/data/data/dev.omar.goterminal/files";
-    public static final String ROOTFS_PATH = DATA_PATH + "/rootfs/ubuntu-jammy-aarch64";
+    public static final String CACHE_PATH = "/data/data/dev.omar.goterminal/cache";
+    public static final String ROOTFS_PATH = DATA_PATH + "/rootfs";
     public static final String BASH_FILE_PATH = ROOTFS_PATH + "/bin/sh";
     public static final String HOME_PATH = DATA_PATH + "/home";
     public static final String LOCAL_PATH = DATA_PATH + "/local";
@@ -31,7 +36,12 @@ public class TerminalInstaller {
 
     private static final String INSTALLED_MARKER_FILE_PATH = ROOTFS_PATH + "/.installed";
 
+    public static boolean isTerminalInstalled(){
+        return new File(INSTALLED_MARKER_FILE_PATH).exists();
+    }
+
     public static CompletableFuture<Result> installIfNeeded(Context context) {
+
         return extractInitScript()
                 .thenApply(
                         t -> {
@@ -65,39 +75,36 @@ public class TerminalInstaller {
         return ArchUtils.getArch().concat("/").concat(name);
     }
 
+    private static void initDirs() {
+        // Create directories
+        FileUtils.createOrExistsDir(ROOTFS_PATH);
+        FileUtils.createOrExistsDir(CACHE_PATH);
+        FileUtils.createOrExistsDir(HOME_PATH);
+        FileUtils.createOrExistsDir(LOCAL_PATH);
+        FileUtils.createOrExistsDir(BIN_PATH);
+        FileUtils.createOrExistsDir(LIB_PATH);
+        FileUtils.createOrExistsDir(TMP_PATH);
+
+
+    }
+
+    @NonNull
+    @Contract("_ -> new")
     private static Result extractUbuntu(@NonNull Context context) {
         try {
-            // Create directories
-            FileUtils.createOrExistsDir(ROOTFS_PATH);
-            FileUtils.createOrExistsDir(HOME_PATH);
-            FileUtils.createOrExistsDir(LOCAL_PATH);
-            FileUtils.createOrExistsDir(BIN_PATH);
-            FileUtils.createOrExistsDir(LIB_PATH);
-            FileUtils.createOrExistsDir(TMP_PATH);
-            Os.chmod(TMP_PATH, 0777);
+            initDirs();
+            AssetsHelper.exportTool("stat", LOCAL_PATH + "/stat");
+            AssetsHelper.exportTool("vmstat", LOCAL_PATH + "/vmstat");
+            AssetsHelper.exportTool("resolv.conf", ROOTFS_PATH + "/etc/resolv.conf");
+            AssetsHelper.exportTool("hostname", ROOTFS_PATH + "/etc/hostname");
+           AssetsHelper.exportBusybox();
+           AssetsHelper.exportProot();
+           AssetsHelper.exportLibtalloc();
 
-            ResourceUtils.copyFileFromAssets("stat", LOCAL_PATH + "/stat");
-            ResourceUtils.copyFileFromAssets("vmstat", LOCAL_PATH + "/vmstat");
 
-            ResourceUtils.copyFileFromAssets("init.sh", INIT_SCRIPT_FILE_PATH);
-            ResourceUtils.copyFileFromAssets("init-host.sh", INIT_HOST_FILE_PATH);
-            Os.chmod(INIT_SCRIPT_FILE_PATH, 0777);
-            Os.chmod(INIT_HOST_FILE_PATH, 0777);
 
-            ResourceUtils.copyFileFromAssets(getCompatAsset("proot"), PROOT_FILE_PATH);
-            ResourceUtils.copyFileFromAssets("busybox", BUSYBOX_FILE_PATH);
-            ResourceUtils.copyFileFromAssets(
-                    getCompatAsset("libtalloc.so.2"), LIB_PATH + "/libtalloc.so.2");
-
-            // Set Permissions for proot and libraries
-            Os.chmod(PROOT_FILE_PATH, 0777);
-            Os.chmod(LIB_PATH + "/libtalloc.so.2", 0755);
-            Os.chmod(BUSYBOX_FILE_PATH, 0777);
-
-            // Extract Ubuntu Rootfs
-            File ubuntuTar = new File(context.getCacheDir(), "ubuntu.tar.xz");
-            ResourceUtils.copyFileFromAssets(
-                    getCompatAsset("ubuntu.tar.xz"), ubuntuTar.getAbsolutePath());
+            File ubuntuTar = new File(context.getFilesDir(), "ubuntu");
+            ResourceUtils.copyFileFromAssets(ArchUtils.getArch().concat("/ubuntu"),ubuntuTar.getAbsolutePath());
 
             Process process =
                     new ProcessBuilder()
@@ -107,26 +114,26 @@ public class TerminalInstaller {
                                     "-xJf",
                                     ubuntuTar.getAbsolutePath(),
                                     "-C",
-                                    new File(ROOTFS_PATH).getParent())
+                                    new File(ROOTFS_PATH).getAbsolutePath())
                             .redirectErrorStream(true)
                             .start();
 
             int exitCode = process.waitFor();
-            ResourceUtils.copyFileFromAssets("resolv.conf", ROOTFS_PATH + "/etc/resolv.conf");
+
             ubuntuTar.delete();
 
             if (exitCode != 0) {
                 return new Result(false, "Extraction failed with exit code: " + exitCode);
             }
 
-            
+
             // Create marker
             File marker = new File(INSTALLED_MARKER_FILE_PATH);
             if (!marker.getParentFile().exists()) marker.getParentFile().mkdirs();
             marker.createNewFile();
 
             return new Result(true, "Installation successful");
-        } catch (IOException | ErrnoException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             return new Result(false, e.getMessage());
         }
     }
