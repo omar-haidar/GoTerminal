@@ -128,4 +128,35 @@ public class MainActivity extends EdgeToEdgeActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private boolean bindService() {
+        Intent intent = new Intent(MainActivity.this, TerminalService.class);
+        intent.setAction(TerminalServiceAction.ACTION_BIND);
+        startService(intent);
+        return bindService(intent, this, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        terminalService = ((TerminalServiceBinder) iBinder).getService();
+        isBound = true;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        isBound = false;
+        Log.i(TAG, "onServiceDisconnected");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(this);
+    }
 }
