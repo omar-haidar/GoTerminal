@@ -1,6 +1,11 @@
 package dev.omar.goterminal;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,6 +19,9 @@ import com.termux.terminal.TerminalSession;
 
 import dev.omar.goterminal.databinding.ActivityMainBinding;
 import dev.omar.goterminal.terminal.TerminalBackend;
+import dev.omar.goterminal.terminal.service.TerminalService;
+import dev.omar.goterminal.terminal.service.TerminalServiceAction;
+import dev.omar.goterminal.terminal.service.TerminalServiceBinder;
 import dev.omar.goterminal.ui.base.EdgeToEdgeActivity;
 import dev.omar.goterminal.ui.settings.SettingsActivity;
 import dev.omar.goterminal.ui.sheet.ProgressSheetDialog;
@@ -21,7 +29,7 @@ import dev.omar.goterminal.utils.Environment;
 import dev.omar.goterminal.utils.TerminalInstaller;
 import dev.omar.goterminal.utils.UiUtils;
 
-public class MainActivity extends EdgeToEdgeActivity {
+public class MainActivity extends EdgeToEdgeActivity implements ServiceConnection {
 
     private final OnBackPressedCallback backCallback =
             new OnBackPressedCallback(true) {
@@ -34,9 +42,15 @@ public class MainActivity extends EdgeToEdgeActivity {
                     }
                 }
             };
+
+    private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
     private TerminalBackend terminalBackend;
+
+    private TerminalService terminalService;
+
+    private boolean isBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +94,7 @@ public class MainActivity extends EdgeToEdgeActivity {
 
         TerminalSession session =
                 new TerminalSession(
-                        TerminalInstaller.BASH_FILE_PATH,
+                        "/system/bin/sh",
                         TerminalInstaller.ROOTFS_PATH,
                         new String[]{"-c", TerminalInstaller.INIT_HOST_FILE_PATH},
                         Environment.envToProps(Environment.getEnvironment()),

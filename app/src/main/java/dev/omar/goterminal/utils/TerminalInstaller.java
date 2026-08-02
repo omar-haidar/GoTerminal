@@ -17,7 +17,7 @@ public class TerminalInstaller {
 
     public static final String DATA_PATH = "/data/data/dev.omar.goterminal/files";
     public static final String ROOTFS_PATH = DATA_PATH + "/rootfs/ubuntu-jammy-aarch64";
-    public static final String BASH_FILE_PATH = DATA_PATH + "/rootfs/ubuntu-jammy-aarch64/bin/bash";
+    public static final String BASH_FILE_PATH = ROOTFS_PATH + "/bin/sh";
     public static final String HOME_PATH = DATA_PATH + "/home";
     public static final String LOCAL_PATH = DATA_PATH + "/local";
     public static final String BIN_PATH = DATA_PATH + "/bin";
@@ -74,6 +74,7 @@ public class TerminalInstaller {
             FileUtils.createOrExistsDir(BIN_PATH);
             FileUtils.createOrExistsDir(LIB_PATH);
             FileUtils.createOrExistsDir(TMP_PATH);
+            Os.chmod(TMP_PATH, 0777);
 
             ResourceUtils.copyFileFromAssets("stat", LOCAL_PATH + "/stat");
             ResourceUtils.copyFileFromAssets("vmstat", LOCAL_PATH + "/vmstat");

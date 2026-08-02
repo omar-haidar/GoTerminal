@@ -77,6 +77,14 @@ public class TerminalService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        switch (intent.getAction()){
+            case TerminalServiceAction.ACTION_EXIT -> exit();
+        }
         return START_NOT_STICKY;
+    }
+
+    private void exit(){
+        stopForeground(true);
+        stopSelf();
     }
 }
